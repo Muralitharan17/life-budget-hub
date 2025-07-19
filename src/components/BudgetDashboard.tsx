@@ -3535,11 +3535,13 @@ const BudgetDashboard = () => {
                         user: currentProfile.name,
                       }));
                     const investments = currentProfile.investmentEntries
-                      .filter(
-                        (investment) =>
-                          new Date(investment.date).getMonth() ===
-                          selectedMonth,
-                      )
+                      .filter((investment) => {
+                        const investmentDate = new Date(investment.date);
+                        return (
+                          investmentDate.getMonth() === selectedMonth &&
+                          investmentDate.getFullYear() === selectedYear
+                        );
+                      })
                       .map((investment) => ({
                         ...investment,
                         type: "investment",
