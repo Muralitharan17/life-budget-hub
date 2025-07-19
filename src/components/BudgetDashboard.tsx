@@ -3253,7 +3253,7 @@ const BudgetDashboard = () => {
                 </Card>
               )}
 
-              {user && (
+              {user && budgetConfig?.id !== "local" && (
                 <Card className="border-success/50 bg-success/5">
                   <CardContent className="pt-4">
                     <div className="flex items-start gap-3">
@@ -3270,6 +3270,42 @@ const BudgetDashboard = () => {
                           configurations and transactions are saved to the
                           cloud.
                         </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {user && budgetConfig?.id === "local" && (
+                <Card className="border-warning/50 bg-warning/5">
+                  <CardContent className="pt-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-warning/20 rounded-lg">
+                        <Lock className="h-5 w-5 text-warning" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-warning mb-1">
+                          Running in Offline Mode
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Supabase connection failed. Using local data for now.
+                        </p>
+                        <div className="text-xs text-muted-foreground space-y-1">
+                          <p>💡 Common fixes:</p>
+                          <p>• Check if your Supabase project is active</p>
+                          <p>• Free tier projects pause after inactivity</p>
+                          <p>
+                            • Visit{" "}
+                            <a
+                              href="https://supabase.com/dashboard"
+                              target="_blank"
+                              className="text-primary hover:underline"
+                            >
+                              Supabase Dashboard
+                            </a>{" "}
+                            to wake it up
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
