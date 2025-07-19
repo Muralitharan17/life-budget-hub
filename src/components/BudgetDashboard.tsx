@@ -2150,7 +2150,6 @@ const BudgetDashboard = () => {
 
   const BankBalanceTracker = () => {
     const [newOpeningBalance, setNewOpeningBalance] = useState("");
-    const currentYear = new Date().getFullYear();
     const balanceData = calculateCurrentBalance();
 
     const handleSetOpeningBalance = (e: React.FormEvent) => {
