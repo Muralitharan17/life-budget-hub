@@ -1366,6 +1366,7 @@ const BudgetDashboard = () => {
           onSalaryUpdate={onSalaryUpdate}
           currentSalary={currentSalary}
           currentBudgetPercentage={currentBudgetPercentage}
+          currentBudgetAllocation={currentProfile.budgetAllocation}
         />
 
         <InvestmentConfig
