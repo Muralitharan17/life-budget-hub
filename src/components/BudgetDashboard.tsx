@@ -3185,6 +3185,65 @@ const BudgetDashboard = () => {
 
           <TabsContent value="overview">
             <div className="space-y-6">
+              {/* Data Source Status */}
+              {!user && (
+                <Card className="border-warning/50 bg-warning/5">
+                  <CardContent className="pt-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-warning/20 rounded-lg">
+                        <UserCheck className="h-5 w-5 text-warning" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-warning mb-1">
+                          Using Local Data Only
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Your data is currently stored locally in your browser.
+                          To sync data across devices and ensure proper
+                          month/year filtering from Supabase:
+                        </p>
+                        <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                          <li>
+                            Sign in to your account to enable Supabase
+                            integration
+                          </li>
+                          <li>
+                            Configure your Supabase credentials
+                            (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY)
+                          </li>
+                          <li>
+                            Data will then be properly filtered by month and
+                            year from the database
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {user && (
+                <Card className="border-success/50 bg-success/5">
+                  <CardContent className="pt-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-success/20 rounded-lg">
+                        <UserCheck className="h-5 w-5 text-success" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-success mb-1">
+                          Supabase Connected
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Your data is now synchronized with Supabase and will
+                          update when you change months or years. All budget
+                          configurations and transactions are saved to the
+                          cloud.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
               {/* Budget Category Progress Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <CategoryProgressCard
