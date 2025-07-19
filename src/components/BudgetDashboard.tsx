@@ -2222,7 +2222,8 @@ const BudgetDashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
-              Bank Balance Summary for {monthNames[selectedMonth]} {currentYear}
+              Bank Balance Summary for {monthNames[selectedMonth]}{" "}
+              {selectedYear}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -2230,7 +2231,7 @@ const BudgetDashboard = () => {
               <div className="text-center p-4 bg-background/50 rounded-lg">
                 <p className="text-sm text-muted-foreground">Opening Balance</p>
                 <p className="text-2xl font-bold text-primary">
-                  ���{balanceData.openingBalance.toLocaleString()}
+                  ₹{balanceData.openingBalance.toLocaleString()}
                 </p>
               </div>
               <div className="text-center p-4 bg-background/50 rounded-lg">
