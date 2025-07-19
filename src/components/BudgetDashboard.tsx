@@ -276,8 +276,41 @@ const BudgetDashboard = () => {
     },
   });
 
-  const currentProfile =
-    currentUser === "combined" ? profiles.murali : profiles[currentUser];
+  // Create current profile from Supabase data
+  const currentProfile = budgetConfig
+    ? {
+        name: user?.email?.split("@")[0] || "User",
+        partnerName: "",
+        salary: budgetConfig.monthly_salary,
+        budgetPercentage: budgetConfig.budget_percentage,
+        budgetAllocation: {
+          need: budgetConfig.allocation_need,
+          want: budgetConfig.allocation_want,
+          savings: budgetConfig.allocation_savings,
+          investments: budgetConfig.allocation_investments,
+        },
+        expenses: supabaseTransactions.filter((t) => t.type === "expense"),
+        customTags: [],
+        investmentPlan: { portfolios: portfolios || [] },
+        investmentEntries: supabaseTransactions.filter(
+          (t) => t.type === "investment",
+        ),
+        bankBalances: [],
+        refunds: supabaseTransactions.filter((t) => t.type === "refund"),
+      }
+    : {
+        name: user?.email?.split("@")[0] || "User",
+        partnerName: "",
+        salary: 0,
+        budgetPercentage: 0,
+        budgetAllocation: { need: 0, want: 0, savings: 0, investments: 0 },
+        expenses: [],
+        customTags: [],
+        investmentPlan: { portfolios: [] },
+        investmentEntries: [],
+        bankBalances: [],
+        refunds: [],
+      };
 
   const monthNames = [
     "January",
