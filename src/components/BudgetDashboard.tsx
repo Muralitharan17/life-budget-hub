@@ -474,12 +474,18 @@ const BudgetDashboard = () => {
       const muraliEntries = profiles.murali.investmentEntries.filter(
         (entry) => {
           const entryDate = new Date(entry.date);
-          return entryDate.getMonth() === selectedMonth;
+          return (
+            entryDate.getMonth() === selectedMonth &&
+            entryDate.getFullYear() === selectedYear
+          );
         },
       );
       const valarEntries = profiles.valar.investmentEntries.filter((entry) => {
         const entryDate = new Date(entry.date);
-        return entryDate.getMonth() === selectedMonth;
+        return (
+          entryDate.getMonth() === selectedMonth &&
+          entryDate.getFullYear() === selectedYear
+        );
       });
       currentMonthEntries = [...muraliEntries, ...valarEntries];
     } else {
