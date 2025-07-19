@@ -3404,7 +3404,8 @@ const BudgetDashboard = () => {
                   Transaction Statement
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  All transactions for {monthNames[selectedMonth]} -{" "}
+                  All transactions for {monthNames[selectedMonth]}{" "}
+                  {selectedYear} -{" "}
                   {currentUser === "combined"
                     ? "Combined View"
                     : currentProfile.name}
