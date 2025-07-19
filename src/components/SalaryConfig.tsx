@@ -154,8 +154,12 @@ const SalaryConfig = ({
               <Input
                 id="salary"
                 type={showSalary ? "number" : "password"}
-                value={actualSalary || ""}
-                onChange={(e) => setActualSalary(Number(e.target.value))}
+                value={actualSalary === 0 ? "" : actualSalary}
+                onChange={(e) =>
+                  setActualSalary(
+                    e.target.value === "" ? 0 : Number(e.target.value),
+                  )
+                }
                 placeholder="Enter your monthly salary"
                 className="pr-10"
               />
