@@ -652,7 +652,7 @@ const BudgetDashboard = () => {
     if (user) {
       refetch();
     }
-  }, [selectedMonth, selectedYear, user, refetch]);
+  }, [selectedMonth, selectedYear, user]);
 
   useEffect(() => {
     const saved = localStorage.getItem("budgetProfiles");
