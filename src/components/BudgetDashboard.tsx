@@ -2927,6 +2927,43 @@ const BudgetDashboard = () => {
     );
   };
 
+  // Show loading state while fetching data
+  if (dataLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-bg p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading your budget data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show connection status if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-bg p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="text-center py-12">
+            <Card className="max-w-md mx-auto">
+              <CardContent className="pt-6">
+                <UserCheck className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">
+                  Authentication Required
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Please sign in to access your budget data stored in Supabase.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-bg">
       {/* Header */}
