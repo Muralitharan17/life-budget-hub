@@ -411,16 +411,27 @@ const InvestmentConfig = ({
     ) => void;
   }) => {
     const [open, setOpen] = useState(false);
-    const [name, setName] = useState(portfolio?.name || "");
+    const [name, setName] = useState("");
     const [allocationType, setAllocationType] = useState<
       "percentage" | "amount"
-    >(portfolio?.allocationType || "percentage");
-    const [allocationValue, setAllocationValue] = useState(
-      portfolio?.allocationValue?.toString() || "",
-    );
-    const [allowDirectInvestment, setAllowDirectInvestment] = useState(
-      portfolio?.allowDirectInvestment || false,
-    );
+    >("percentage");
+    const [allocationValue, setAllocationValue] = useState("");
+    const [allowDirectInvestment, setAllowDirectInvestment] = useState(false);
+
+    // Initialize form data when dialog opens
+    useEffect(() => {
+      if (open && portfolio) {
+        setName(portfolio.name);
+        setAllocationType(portfolio.allocationType);
+        setAllocationValue(portfolio.allocationValue.toString());
+        setAllowDirectInvestment(portfolio.allowDirectInvestment);
+      } else if (open && !portfolio) {
+        setName("");
+        setAllocationType("percentage");
+        setAllocationValue("");
+        setAllowDirectInvestment(false);
+      }
+    }, [open, portfolio]);
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
