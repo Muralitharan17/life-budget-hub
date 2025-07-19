@@ -3563,7 +3563,8 @@ const BudgetDashboard = () => {
                     <div className="text-center py-8 text-muted-foreground">
                       <Wallet className="h-12 w-12 mx-auto mb-4 opacity-50" />
                       <p>
-                        No transactions found for {monthNames[selectedMonth]}
+                        No transactions found for {monthNames[selectedMonth]}{" "}
+                        {selectedYear}
                       </p>
                       <p className="text-sm">
                         Add some expenses, refunds, or investments to see them
