@@ -225,11 +225,17 @@ const SalaryConfig = ({
                   type="number"
                   min="0"
                   max="100"
-                  value={budgetAllocation.need}
+                  value={
+                    budgetAllocation.need === 0 ? "" : budgetAllocation.need
+                  }
                   onChange={(e) =>
-                    handleAllocationChange("need", Number(e.target.value))
+                    handleAllocationChange(
+                      "need",
+                      e.target.value === "" ? 0 : Number(e.target.value),
+                    )
                   }
                   className="flex-1"
+                  placeholder="0"
                 />
                 <Percent className="h-4 w-4 text-muted-foreground" />
               </div>
