@@ -59,34 +59,7 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
 
     if (!isSupabaseConfigured) {
       console.warn("Supabase not configured - falling back to localStorage");
-      // Fallback to localStorage for development
-      try {
-        const saved = localStorage.getItem("budgetProfiles");
-        if (saved) {
-          const profiles = JSON.parse(saved);
-          const userProfile =
-            profiles[user.email?.split("@")[0]] ||
-            profiles["murali"] ||
-            profiles["valar"];
-          if (userProfile) {
-            setBudgetConfig({
-              id: "local",
-              user_id: user.id,
-              monthly_salary: userProfile.salary || 0,
-              budget_percentage: userProfile.budgetPercentage || 0,
-              allocation_need: userProfile.budgetAllocation?.need || 0,
-              allocation_want: userProfile.budgetAllocation?.want || 0,
-              allocation_savings: userProfile.budgetAllocation?.savings || 0,
-              allocation_investments:
-                userProfile.budgetAllocation?.investments || 0,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Error loading from localStorage:", error);
-      }
+      loadFromLocalStorage();
       setLoading(false);
       return;
     }
@@ -306,42 +279,21 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
         error instanceof Error ? error.message : String(error);
       if (
         errorMessage.includes("Failed to fetch") ||
-        errorMessage.includes("network")
+        errorMessage.includes("network") ||
+        errorMessage.includes("TypeError")
       ) {
         console.warn(
           "⚠️ Network error detected, falling back to localStorage...",
         );
-        try {
-          const saved = localStorage.getItem("budgetProfiles");
-          if (saved) {
-            const profiles = JSON.parse(saved);
-            const userProfile =
-              profiles[user.email?.split("@")[0]] ||
-              profiles["murali"] ||
-              profiles["valar"];
-            if (userProfile) {
-              setBudgetConfig({
-                id: "local",
-                user_id: user.id,
-                monthly_salary: userProfile.salary || 0,
-                budget_percentage: userProfile.budgetPercentage || 0,
-                allocation_need: userProfile.budgetAllocation?.need || 0,
-                allocation_want: userProfile.budgetAllocation?.want || 0,
-                allocation_savings: userProfile.budgetAllocation?.savings || 0,
-                allocation_investments:
-                  userProfile.budgetAllocation?.investments || 0,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              });
-              console.log("✅ Loaded data from localStorage as fallback");
-            }
-          }
-        } catch (localError) {
-          console.error(
-            "Error loading from localStorage fallback:",
-            localError,
-          );
-        }
+        console.warn("💡 Common causes:");
+        console.warn("  - Supabase project might be paused (free tier)");
+        console.warn("  - Network connectivity issues");
+        console.warn("  - CORS or firewall blocking requests");
+        console.warn(
+          "  - Check your Supabase project status at: https://supabase.com/dashboard",
+        );
+
+        loadFromLocalStorage();
       }
     } finally {
       setLoading(false);
