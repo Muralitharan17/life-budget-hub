@@ -3343,7 +3343,7 @@ const BudgetDashboard = () => {
             </div>
           </TabsContent>
 
-                    <TabsContent value="transactions">
+                              <TabsContent value="transactions">
             <div className="space-y-6">
               {/* Bank Balance Section - Only for Individual Users */}
               {currentUser !== "combined" && (
