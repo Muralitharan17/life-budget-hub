@@ -46,6 +46,40 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
     }
   }, [user]);
 
+  // Helper function to load data from localStorage
+  const loadFromLocalStorage = () => {
+    try {
+      const saved = localStorage.getItem("budgetProfiles");
+      if (saved) {
+        const profiles = JSON.parse(saved);
+        const userProfile =
+          profiles[user?.email?.split("@")[0]] ||
+          profiles["murali"] ||
+          profiles["valar"];
+        if (userProfile) {
+          setBudgetConfig({
+            id: "local",
+            user_id: user?.id || "local",
+            monthly_salary: userProfile.salary || 0,
+            budget_percentage: userProfile.budgetPercentage || 0,
+            allocation_need: userProfile.budgetAllocation?.need || 0,
+            allocation_want: userProfile.budgetAllocation?.want || 0,
+            allocation_savings: userProfile.budgetAllocation?.savings || 0,
+            allocation_investments:
+              userProfile.budgetAllocation?.investments || 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+          console.log("✅ Loaded data from localStorage as fallback");
+          return true;
+        }
+      }
+    } catch (localError) {
+      console.error("Error loading from localStorage fallback:", localError);
+    }
+    return false;
+  };
+
   const fetchBudgetData = useCallback(async () => {
     if (!user) return;
 
@@ -110,13 +144,28 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
         // Check for specific network errors
         if (
           testError.message &&
-          testError.message.includes("Failed to fetch")
+          (testError.message.includes("Failed to fetch") ||
+            testError.message.includes("TypeError"))
         ) {
-          console.error("❌ Network connectivity issue detected:");
-          console.error("- Check if Supabase URL is correct:", supabaseUrl);
-          console.error("- Verify your internet connection");
-          console.error("- Check if the Supabase project is active");
-          console.error("- Verify firewall/proxy settings");
+          console.error(
+            "❌ Supabase connection failed - falling back to localStorage",
+          );
+          console.error("💡 Possible solutions:");
+          console.error(
+            "  1. Check if your Supabase project is active: https://supabase.com/dashboard",
+          );
+          console.error(
+            "  2. Free tier projects pause after inactivity - visit dashboard to wake it up",
+          );
+          console.error("  3. Verify Supabase URL:", supabaseUrl);
+          console.error("  4. Check your internet connection");
+
+          // Immediately fall back to localStorage for network errors
+          const fallbackLoaded = loadFromLocalStorage();
+          if (fallbackLoaded) {
+            setLoading(false);
+            return; // Exit early with localStorage data
+          }
         }
       } else {
         console.log("✅ Supabase connectivity test passed", testData);
