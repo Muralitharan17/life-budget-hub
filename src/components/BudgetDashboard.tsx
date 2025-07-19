@@ -3009,6 +3009,13 @@ const BudgetDashboard = () => {
               <span className="hidden sm:inline">Bank</span>
             </TabsTrigger>
             <TabsTrigger
+              value="transactions"
+              className="flex items-center gap-2"
+            >
+              <Wallet className="h-4 w-4" />
+              <span className="hidden sm:inline">Transactions</span>
+            </TabsTrigger>
+            <TabsTrigger
               value="config"
               className="flex items-center gap-2 text-warning"
               title="Salary Configuration (Password Protected)"
