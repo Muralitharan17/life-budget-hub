@@ -191,22 +191,12 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
         setBudgetConfig(configData);
       }
 
-      // Fetch investment portfolios (check if new columns exist)
-      let portfolioQuery = supabase
+      // Fetch investment portfolios
+      const { data: portfolioData, error: portfolioError } = await supabase
         .from("investment_portfolios")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: true });
-
-      // Try to filter by is_active if the column exists
-      try {
-        portfolioQuery = portfolioQuery.eq("is_active", true);
-      } catch {
-        // Column doesn't exist yet, continue without filter
-      }
-
-      const { data: portfolioData, error: portfolioError } =
-        await portfolioQuery;
 
       if (portfolioError) {
         console.error("Error fetching portfolios:");
@@ -236,22 +226,13 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
         setPortfolios(portfolioData || []);
       }
 
-      // Fetch transactions filtered by month/year if provided (check if new columns exist)
+      // Fetch transactions filtered by month/year if provided
       let transactionQuery = supabase
         .from("transactions")
         .select("*")
         .eq("user_id", user.id)
         .order("date", { ascending: false })
         .order("created_at", { ascending: false });
-
-      // Try to filter by new columns if they exist
-      try {
-        transactionQuery = transactionQuery
-          .eq("is_deleted", false)
-          .in("status", ["active", "partial_refund"]);
-      } catch {
-        // Columns don't exist yet, continue without filters
-      }
 
       // Add month/year filtering if provided
       if (selectedMonth !== undefined && selectedYear !== undefined) {
