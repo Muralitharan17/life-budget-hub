@@ -65,6 +65,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useBudgetData } from "@/hooks/useBudgetData";
+import { useAuth } from "@/hooks/useAuth";
 import SalaryConfig from "./SalaryConfig";
 import InvestmentConfig from "./InvestmentConfig";
 
