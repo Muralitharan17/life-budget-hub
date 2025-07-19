@@ -38,7 +38,7 @@ interface BudgetAllocation {
 const SalaryConfig = ({
   onSalaryUpdate,
   currentSalary = 0,
-  currentBudgetPercentage = 70,
+  currentBudgetPercentage = 0,
   currentBudgetAllocation,
 }: SalaryConfigProps) => {
   const [actualSalary, setActualSalary] = useState(currentSalary);
@@ -47,13 +47,13 @@ const SalaryConfig = ({
   );
   const [showSalary, setShowSalary] = useState(false);
 
-  // Budget allocation percentages - use current or default
+  // Budget allocation percentages - use current or zero defaults
   const [budgetAllocation, setBudgetAllocation] = useState<BudgetAllocation>(
     currentBudgetAllocation || {
-      need: 50, // Essential expenses
-      want: 30, // Discretionary spending
-      savings: 15, // Emergency fund, short-term savings
-      investments: 5, // Long-term investments
+      need: 0, // Essential expenses
+      want: 0, // Discretionary spending
+      savings: 0, // Emergency fund, short-term savings
+      investments: 0, // Long-term investments
     },
   );
 
