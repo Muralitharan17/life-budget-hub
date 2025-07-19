@@ -3457,10 +3457,13 @@ const BudgetDashboard = () => {
                         user: "Murali",
                       }));
                     const valarRefunds = profiles.valar.refunds
-                      .filter(
-                        (refund) =>
-                          new Date(refund.date).getMonth() === selectedMonth,
-                      )
+                      .filter((refund) => {
+                        const refundDate = new Date(refund.date);
+                        return (
+                          refundDate.getMonth() === selectedMonth &&
+                          refundDate.getFullYear() === selectedYear
+                        );
+                      })
                       .map((refund) => ({
                         ...refund,
                         type: "refund",
