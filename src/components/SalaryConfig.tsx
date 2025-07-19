@@ -351,19 +351,37 @@ const SalaryConfig = ({
           <div
             className={`p-4 rounded-lg border-2 ${
               isAllocationValid
-                ? "bg-success/20 border-success/50 text-success-foreground"
-                : "bg-warning/20 border-warning/50 text-warning-foreground"
+                ? "bg-success/20 border-success/50"
+                : "bg-warning/20 border-warning/50"
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-lg">Total Allocation:</span>
-              <span className="font-bold text-2xl">
+              <span
+                className={`font-semibold text-lg ${
+                  isAllocationValid
+                    ? "text-success"
+                    : "text-orange-700 dark:text-orange-400"
+                }`}
+              >
+                Total Allocation:
+              </span>
+              <span
+                className={`font-bold text-2xl ${
+                  isAllocationValid
+                    ? "text-success"
+                    : "text-orange-700 dark:text-orange-400"
+                }`}
+              >
                 {totalAllocationPercentage}%
               </span>
             </div>
             {!isAllocationValid && (
               <p
-                className={`text-base mt-2 font-semibold ${totalAllocationPercentage > 100 ? "text-destructive" : "text-primary"}`}
+                className={`text-base mt-2 font-semibold ${
+                  totalAllocationPercentage > 100
+                    ? "text-destructive"
+                    : "text-blue-700 dark:text-blue-400"
+                }`}
               >
                 {totalAllocationPercentage > 100
                   ? `⚠️ Reduce by ${totalAllocationPercentage - 100}%`
