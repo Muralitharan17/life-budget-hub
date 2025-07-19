@@ -703,7 +703,16 @@ const InvestmentConfig = ({
     onSave: (name: string) => void;
   }) => {
     const [open, setOpen] = useState(false);
-    const [name, setName] = useState(fund?.name || "");
+    const [name, setName] = useState("");
+
+    // Initialize form data when dialog opens
+    useEffect(() => {
+      if (open && fund) {
+        setName(fund.name);
+      } else if (open && !fund) {
+        setName("");
+      }
+    }, [open, fund]);
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
