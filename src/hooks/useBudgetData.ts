@@ -146,6 +146,16 @@ export function useBudgetData() {
           hint: portfolioError.hint,
           code: portfolioError.code,
         });
+
+        if (portfolioError.code === "42P01") {
+          console.error(
+            '❌ Table "investment_portfolios" does not exist in your Supabase database',
+          );
+        } else if (portfolioError.code === "PGRST301") {
+          console.error(
+            "❌ RLS is blocking access to investment_portfolios table",
+          );
+        }
       } else {
         setPortfolios(portfolioData || []);
       }
