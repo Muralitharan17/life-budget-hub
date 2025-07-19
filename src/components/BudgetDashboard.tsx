@@ -3509,10 +3509,13 @@ const BudgetDashboard = () => {
                   } else {
                     // Single user transactions
                     const expenses = currentProfile.expenses
-                      .filter(
-                        (expense) =>
-                          new Date(expense.date).getMonth() === selectedMonth,
-                      )
+                      .filter((expense) => {
+                        const expenseDate = new Date(expense.date);
+                        return (
+                          expenseDate.getMonth() === selectedMonth &&
+                          expenseDate.getFullYear() === selectedYear
+                        );
+                      })
                       .map((expense) => ({
                         ...expense,
                         type: "expense",
