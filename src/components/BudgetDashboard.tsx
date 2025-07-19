@@ -3053,16 +3053,12 @@ const BudgetDashboard = () => {
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">Investments</span>
             </TabsTrigger>
-            <TabsTrigger value="bank" className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
-              <span className="hidden sm:inline">Bank</span>
-            </TabsTrigger>
             <TabsTrigger
               value="transactions"
               className="flex items-center gap-2"
             >
-              <Wallet className="h-4 w-4" />
-              <span className="hidden sm:inline">Transactions</span>
+              <CreditCard className="h-4 w-4" />
+              <span className="hidden sm:inline">Bank & Transactions</span>
             </TabsTrigger>
             <TabsTrigger
               value="config"
@@ -3139,7 +3135,7 @@ const BudgetDashboard = () => {
                         Total Spent
                       </p>
                       <p className="text-2xl font-bold text-destructive">
-                        ₹{totalSpent.toLocaleString()}
+                        ���{totalSpent.toLocaleString()}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         Need + Want + Savings + Investments
