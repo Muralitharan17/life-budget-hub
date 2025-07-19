@@ -274,6 +274,49 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
         stack: error instanceof Error ? error.stack : undefined,
         stringified: String(error),
       });
+
+      // If it's a network error, fall back to localStorage
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      if (
+        errorMessage.includes("Failed to fetch") ||
+        errorMessage.includes("network")
+      ) {
+        console.warn(
+          "⚠️ Network error detected, falling back to localStorage...",
+        );
+        try {
+          const saved = localStorage.getItem("budgetProfiles");
+          if (saved) {
+            const profiles = JSON.parse(saved);
+            const userProfile =
+              profiles[user.email?.split("@")[0]] ||
+              profiles["murali"] ||
+              profiles["valar"];
+            if (userProfile) {
+              setBudgetConfig({
+                id: "local",
+                user_id: user.id,
+                monthly_salary: userProfile.salary || 0,
+                budget_percentage: userProfile.budgetPercentage || 0,
+                allocation_need: userProfile.budgetAllocation?.need || 0,
+                allocation_want: userProfile.budgetAllocation?.want || 0,
+                allocation_savings: userProfile.budgetAllocation?.savings || 0,
+                allocation_investments:
+                  userProfile.budgetAllocation?.investments || 0,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              });
+              console.log("✅ Loaded data from localStorage as fallback");
+            }
+          }
+        } catch (localError) {
+          console.error(
+            "Error loading from localStorage fallback:",
+            localError,
+          );
+        }
+      }
     } finally {
       setLoading(false);
     }
