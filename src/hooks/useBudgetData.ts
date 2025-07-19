@@ -86,7 +86,11 @@ export function useBudgetData() {
         setTransactions(transactionData || []);
       }
     } catch (error) {
-      console.error("Error fetching budget data:", error);
+      console.error("Error fetching budget data:", {
+        error,
+        message: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+      });
     } finally {
       setLoading(false);
     }
