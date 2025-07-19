@@ -570,13 +570,24 @@ const InvestmentConfig = ({
     ) => void;
   }) => {
     const [open, setOpen] = useState(false);
-    const [name, setName] = useState(category?.name || "");
+    const [name, setName] = useState("");
     const [allocationType, setAllocationType] = useState<
       "percentage" | "amount"
-    >(category?.allocationType || "percentage");
-    const [allocationValue, setAllocationValue] = useState(
-      category?.allocationValue?.toString() || "",
-    );
+    >("percentage");
+    const [allocationValue, setAllocationValue] = useState("");
+
+    // Initialize form data when dialog opens
+    useEffect(() => {
+      if (open && category) {
+        setName(category.name);
+        setAllocationType(category.allocationType);
+        setAllocationValue(category.allocationValue.toString());
+      } else if (open && !category) {
+        setName("");
+        setAllocationType("percentage");
+        setAllocationValue("");
+      }
+    }, [open, category]);
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
