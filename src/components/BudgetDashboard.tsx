@@ -2658,7 +2658,9 @@ const BudgetDashboard = () => {
         .filter((refund) => {
           const refundDate = new Date(refund.date);
           const matchesCategory = refund.category === category;
-          const matchesMonth = refundDate.getMonth() === selectedMonth;
+          const matchesMonth =
+            refundDate.getMonth() === selectedMonth &&
+            refundDate.getFullYear() === selectedYear;
           const matchesDateFilter = !filterDate || refund.date === filterDate;
           return matchesCategory && matchesMonth && matchesDateFilter;
         })
