@@ -3017,9 +3017,20 @@ const BudgetDashboard = () => {
               <div className="bg-gradient-primary p-2 rounded-lg">
                 <Wallet className="h-6 w-6 text-primary-foreground" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground">
-                Budget Tracker
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-foreground">
+                  Budget Tracker
+                </h1>
+                {user ? (
+                  <Badge variant="default" className="text-xs bg-success">
+                    Supabase Connected
+                  </Badge>
+                ) : (
+                  <Badge variant="destructive" className="text-xs">
+                    Local Mode Only
+                  </Badge>
+                )}
+              </div>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-muted-foreground">
