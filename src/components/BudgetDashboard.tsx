@@ -65,6 +65,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useBudgetData } from "@/hooks/useBudgetData";
+import { useAuth } from "@/hooks/useAuth";
 import SalaryConfig from "./SalaryConfig";
 import InvestmentConfig from "./InvestmentConfig";
 
@@ -218,6 +220,7 @@ const TAG_COLORS = {
 
 const BudgetDashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [currentUser, setCurrentUser] = useState<
     "murali" | "valar" | "combined"
   >("murali");
@@ -229,15 +232,28 @@ const BudgetDashboard = () => {
   const [isConfigAuthenticated, setIsConfigAuthenticated] = useState(false);
   const { toast } = useToast();
 
+  // Supabase data integration
+  const { user } = useAuth();
+  const {
+    budgetConfig,
+    portfolios,
+    transactions: supabaseTransactions,
+    loading: dataLoading,
+    saveBudgetConfig,
+    saveInvestmentPortfolio,
+    addTransaction,
+    refetch,
+  } = useBudgetData(selectedMonth, selectedYear);
+
   const [profiles, setProfiles] = useState<
     Record<"murali" | "valar", UserProfile>
   >({
     murali: {
       name: "Murali",
       partnerName: "Valar",
-      salary: 20000,
-      budgetPercentage: 70,
-      budgetAllocation: { need: 50, want: 30, savings: 15, investments: 5 },
+      salary: 0,
+      budgetPercentage: 0,
+      budgetAllocation: { need: 0, want: 0, savings: 0, investments: 0 },
       expenses: [],
       customTags: [],
       investmentPlan: { portfolios: [] },
@@ -248,9 +264,9 @@ const BudgetDashboard = () => {
     valar: {
       name: "Valar",
       partnerName: "Murali",
-      salary: 15000,
-      budgetPercentage: 70,
-      budgetAllocation: { need: 50, want: 30, savings: 15, investments: 5 },
+      salary: 0,
+      budgetPercentage: 0,
+      budgetAllocation: { need: 0, want: 0, savings: 0, investments: 0 },
       expenses: [],
       customTags: [],
       investmentPlan: { portfolios: [] },
@@ -260,8 +276,41 @@ const BudgetDashboard = () => {
     },
   });
 
-  const currentProfile =
-    currentUser === "combined" ? profiles.murali : profiles[currentUser];
+  // Create current profile from Supabase data
+  const currentProfile = budgetConfig
+    ? {
+        name: user?.email?.split("@")[0] || "User",
+        partnerName: "",
+        salary: budgetConfig.monthly_salary,
+        budgetPercentage: budgetConfig.budget_percentage,
+        budgetAllocation: {
+          need: budgetConfig.allocation_need,
+          want: budgetConfig.allocation_want,
+          savings: budgetConfig.allocation_savings,
+          investments: budgetConfig.allocation_investments,
+        },
+        expenses: supabaseTransactions.filter((t) => t.type === "expense"),
+        customTags: [],
+        investmentPlan: { portfolios: portfolios || [] },
+        investmentEntries: supabaseTransactions.filter(
+          (t) => t.type === "investment",
+        ),
+        bankBalances: [],
+        refunds: supabaseTransactions.filter((t) => t.type === "refund"),
+      }
+    : {
+        name: user?.email?.split("@")[0] || "User",
+        partnerName: "",
+        salary: 0,
+        budgetPercentage: 0,
+        budgetAllocation: { need: 0, want: 0, savings: 0, investments: 0 },
+        expenses: [],
+        customTags: [],
+        investmentPlan: { portfolios: [] },
+        investmentEntries: [],
+        bankBalances: [],
+        refunds: [],
+      };
 
   const monthNames = [
     "January",
@@ -290,7 +339,84 @@ const BudgetDashboard = () => {
           (currentProfile.salary * currentProfile.budgetPercentage) / 100,
         );
 
+  // Check if we have actual data for the selected month/year
+  const hasDataForSelectedMonth = () => {
+    const currentDate = new Date();
+    const isCurrentMonth =
+      selectedMonth === currentDate.getMonth() &&
+      selectedYear === currentDate.getFullYear();
+
+    // Always show budget plan for current month
+    if (isCurrentMonth) return true;
+
+    // For past/future months, check if we have actual transaction data
+    if (supabaseTransactions?.length > 0) {
+      return supabaseTransactions.some((transaction) => {
+        const transactionDate = new Date(transaction.date);
+        return (
+          transactionDate.getMonth() === selectedMonth &&
+          transactionDate.getFullYear() === selectedYear
+        );
+      });
+    }
+
+    // For localStorage data, check if we have expenses or transactions
+    if (currentUser === "combined") {
+      const hasExpenses = [
+        ...profiles.murali.expenses,
+        ...profiles.valar.expenses,
+      ].some((expense) => {
+        const expenseDate = new Date(expense.date);
+        return (
+          expenseDate.getMonth() === selectedMonth &&
+          expenseDate.getFullYear() === selectedYear
+        );
+      });
+      const hasRefunds = [
+        ...profiles.murali.refunds,
+        ...profiles.valar.refunds,
+      ].some((refund) => {
+        const refundDate = new Date(refund.date);
+        return (
+          refundDate.getMonth() === selectedMonth &&
+          refundDate.getFullYear() === selectedYear
+        );
+      });
+      return hasExpenses || hasRefunds;
+    } else {
+      const hasExpenses = currentProfile.expenses.some((expense) => {
+        const expenseDate = new Date(expense.date);
+        return (
+          expenseDate.getMonth() === selectedMonth &&
+          expenseDate.getFullYear() === selectedYear
+        );
+      });
+      const hasRefunds = currentProfile.refunds.some((refund) => {
+        const refundDate = new Date(refund.date);
+        return (
+          refundDate.getMonth() === selectedMonth &&
+          refundDate.getFullYear() === selectedYear
+        );
+      });
+      return hasExpenses || hasRefunds;
+    }
+  };
+
   const getAllocatedAmounts = () => {
+    const hasData = hasDataForSelectedMonth();
+
+    // If no data for this month/year, return zeros
+    if (!hasData) {
+      return {
+        need: 0,
+        want: 0,
+        savings: 0,
+        investments: 0,
+        hasData: false,
+      };
+    }
+
+    let result;
     if (currentUser === "combined") {
       // Calculate combined allocations
       const muraliBudget = Math.round(
@@ -330,30 +456,34 @@ const BudgetDashboard = () => {
         ),
       };
 
-      return {
+      result = {
         need: muraliAllocations.need + valarAllocations.need,
         want: muraliAllocations.want + valarAllocations.want,
         savings: muraliAllocations.savings + valarAllocations.savings,
         investments:
           muraliAllocations.investments + valarAllocations.investments,
       };
+    } else {
+      result = {
+        need: Math.round(
+          (calculatedTotalBudget * currentProfile.budgetAllocation.need) / 100,
+        ),
+        want: Math.round(
+          (calculatedTotalBudget * currentProfile.budgetAllocation.want) / 100,
+        ),
+        savings: Math.round(
+          (calculatedTotalBudget * currentProfile.budgetAllocation.savings) /
+            100,
+        ),
+        investments: Math.round(
+          (calculatedTotalBudget *
+            currentProfile.budgetAllocation.investments) /
+            100,
+        ),
+      };
     }
 
-    return {
-      need: Math.round(
-        (calculatedTotalBudget * currentProfile.budgetAllocation.need) / 100,
-      ),
-      want: Math.round(
-        (calculatedTotalBudget * currentProfile.budgetAllocation.want) / 100,
-      ),
-      savings: Math.round(
-        (calculatedTotalBudget * currentProfile.budgetAllocation.savings) / 100,
-      ),
-      investments: Math.round(
-        (calculatedTotalBudget * currentProfile.budgetAllocation.investments) /
-          100,
-      ),
-    };
+    return { ...result, hasData: true };
   };
 
   const allocatedAmounts = getAllocatedAmounts();
@@ -367,33 +497,51 @@ const BudgetDashboard = () => {
       // Combine expenses from both users
       const muraliExpenses = profiles.murali.expenses.filter((expense) => {
         const expenseDate = new Date(expense.date);
-        return expenseDate.getMonth() === selectedMonth;
+        return (
+          expenseDate.getMonth() === selectedMonth &&
+          expenseDate.getFullYear() === selectedYear
+        );
       });
       const valarExpenses = profiles.valar.expenses.filter((expense) => {
         const expenseDate = new Date(expense.date);
-        return expenseDate.getMonth() === selectedMonth;
+        return (
+          expenseDate.getMonth() === selectedMonth &&
+          expenseDate.getFullYear() === selectedYear
+        );
       });
       currentMonthExpenses = [...muraliExpenses, ...valarExpenses];
 
       // Combine refunds from both users
       const muraliRefunds = profiles.murali.refunds.filter((refund) => {
         const refundDate = new Date(refund.date);
-        return refundDate.getMonth() === selectedMonth;
+        return (
+          refundDate.getMonth() === selectedMonth &&
+          refundDate.getFullYear() === selectedYear
+        );
       });
       const valarRefunds = profiles.valar.refunds.filter((refund) => {
         const refundDate = new Date(refund.date);
-        return refundDate.getMonth() === selectedMonth;
+        return (
+          refundDate.getMonth() === selectedMonth &&
+          refundDate.getFullYear() === selectedYear
+        );
       });
       currentMonthRefunds = [...muraliRefunds, ...valarRefunds];
     } else {
       currentMonthExpenses = currentProfile.expenses.filter((expense) => {
         const expenseDate = new Date(expense.date);
-        return expenseDate.getMonth() === selectedMonth;
+        return (
+          expenseDate.getMonth() === selectedMonth &&
+          expenseDate.getFullYear() === selectedYear
+        );
       });
 
       currentMonthRefunds = currentProfile.refunds.filter((refund) => {
         const refundDate = new Date(refund.date);
-        return refundDate.getMonth() === selectedMonth;
+        return (
+          refundDate.getMonth() === selectedMonth &&
+          refundDate.getFullYear() === selectedYear
+        );
       });
     }
 
@@ -455,18 +603,27 @@ const BudgetDashboard = () => {
       const muraliEntries = profiles.murali.investmentEntries.filter(
         (entry) => {
           const entryDate = new Date(entry.date);
-          return entryDate.getMonth() === selectedMonth;
+          return (
+            entryDate.getMonth() === selectedMonth &&
+            entryDate.getFullYear() === selectedYear
+          );
         },
       );
       const valarEntries = profiles.valar.investmentEntries.filter((entry) => {
         const entryDate = new Date(entry.date);
-        return entryDate.getMonth() === selectedMonth;
+        return (
+          entryDate.getMonth() === selectedMonth &&
+          entryDate.getFullYear() === selectedYear
+        );
       });
       currentMonthEntries = [...muraliEntries, ...valarEntries];
     } else {
       currentMonthEntries = currentProfile.investmentEntries.filter((entry) => {
         const entryDate = new Date(entry.date);
-        return entryDate.getMonth() === selectedMonth;
+        return (
+          entryDate.getMonth() === selectedMonth &&
+          entryDate.getFullYear() === selectedYear
+        );
       });
     }
 
@@ -515,26 +672,42 @@ const BudgetDashboard = () => {
     totalInvestmentSpent;
   const totalRemaining = calculatedTotalBudget - totalSpent;
 
-  const handleSalaryUpdate = (salary: number, percentage: number) => {
-    setProfiles((prev) => ({
-      ...prev,
-      [currentUser]: {
-        ...prev[currentUser],
-        salary,
-        budgetPercentage: percentage,
-      },
-    }));
-    localStorage.setItem(
-      "budgetProfiles",
-      JSON.stringify({
-        ...profiles,
-        [currentUser]: {
-          ...profiles[currentUser],
-          salary,
-          budgetPercentage: percentage,
-        },
-      }),
-    );
+  const handleSalaryUpdate = async (
+    salary: number,
+    percentage: number,
+    allocation: BudgetAllocation,
+  ) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to save your budget configuration.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await saveBudgetConfig({
+        monthly_salary: salary,
+        budget_percentage: percentage,
+        allocation_need: allocation.need,
+        allocation_want: allocation.want,
+        allocation_savings: allocation.savings,
+        allocation_investments: allocation.investments,
+      });
+
+      toast({
+        title: "Configuration Saved",
+        description: "Your budget configuration has been saved to Supabase.",
+      });
+    } catch (error) {
+      console.error("Error saving budget config:", error);
+      toast({
+        title: "Save Failed",
+        description: "Failed to save budget configuration. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleInvestmentPlanUpdate = (plan: InvestmentPlan) => {
@@ -554,6 +727,13 @@ const BudgetDashboard = () => {
       setCurrentUser(value as "murali" | "valar" | "combined");
     }
   };
+
+  // Refetch data when month/year changes or when user changes
+  useEffect(() => {
+    if (user) {
+      refetch();
+    }
+  }, [selectedMonth, selectedYear, user]);
 
   useEffect(() => {
     const saved = localStorage.getItem("budgetProfiles");
@@ -1109,8 +1289,7 @@ const BudgetDashboard = () => {
   };
 
   const calculateCurrentBalance = () => {
-    const currentYear = new Date().getFullYear();
-    const openingBalance = getOpeningBalance(selectedMonth, currentYear);
+    const openingBalance = getOpeningBalance(selectedMonth, selectedYear);
     const expenses = getCurrentMonthExpensesByCategory();
     const totalExpenses =
       expenses.need + expenses.want + expenses.savings + expenses.investments;
@@ -1255,8 +1434,13 @@ const BudgetDashboard = () => {
     currentInvestmentPlan,
     isAuthenticated,
     setIsAuthenticated,
+    currentProfile,
   }: {
-    onSalaryUpdate: (salary: number, budgetPercentage: number) => void;
+    onSalaryUpdate: (
+      salary: number,
+      budgetPercentage: number,
+      allocation: BudgetAllocation,
+    ) => void;
     currentSalary: number;
     currentBudgetPercentage: number;
     totalInvestmentAmount: number;
@@ -1265,6 +1449,7 @@ const BudgetDashboard = () => {
     currentInvestmentPlan: InvestmentPlan;
     isAuthenticated: boolean;
     setIsAuthenticated: (value: boolean) => void;
+    currentProfile: UserProfile;
   }) => {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -1360,6 +1545,7 @@ const BudgetDashboard = () => {
           onSalaryUpdate={onSalaryUpdate}
           currentSalary={currentSalary}
           currentBudgetPercentage={currentBudgetPercentage}
+          currentBudgetAllocation={currentProfile.budgetAllocation}
         />
 
         <InvestmentConfig
@@ -2110,7 +2296,6 @@ const BudgetDashboard = () => {
 
   const BankBalanceTracker = () => {
     const [newOpeningBalance, setNewOpeningBalance] = useState("");
-    const currentYear = new Date().getFullYear();
     const balanceData = calculateCurrentBalance();
 
     const handleSetOpeningBalance = (e: React.FormEvent) => {
@@ -2126,7 +2311,7 @@ const BudgetDashboard = () => {
 
       setOpeningBalance(
         selectedMonth,
-        currentYear,
+        selectedYear,
         parseFloat(newOpeningBalance),
       );
       setNewOpeningBalance("");
@@ -2138,7 +2323,7 @@ const BudgetDashboard = () => {
         <Card className="border-l-4 border-l-primary">
           <CardHeader>
             <CardTitle className="text-lg">
-              Set Opening Balance for {monthNames[selectedMonth]} {currentYear}
+              Set Opening Balance for {monthNames[selectedMonth]} {selectedYear}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
               Enter your bank balance at the beginning of the month
@@ -2183,7 +2368,8 @@ const BudgetDashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
-              Bank Balance Summary for {monthNames[selectedMonth]} {currentYear}
+              Bank Balance Summary for {monthNames[selectedMonth]}{" "}
+              {selectedYear}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -2462,7 +2648,7 @@ const BudgetDashboard = () => {
                                         : "text-destructive"
                                     }
                                   >
-                                    Remaining: ���
+                                    Remaining: ₹
                                     {categoryRemaining.toLocaleString()}
                                   </span>
                                 </div>
@@ -2572,7 +2758,9 @@ const BudgetDashboard = () => {
         .filter((expense) => {
           const expenseDate = new Date(expense.date);
           const matchesCategory = expense.category === category;
-          const matchesMonth = expenseDate.getMonth() === selectedMonth;
+          const matchesMonth =
+            expenseDate.getMonth() === selectedMonth &&
+            expenseDate.getFullYear() === selectedYear;
           const matchesDateFilter = !filterDate || expense.date === filterDate;
           return matchesCategory && matchesMonth && matchesDateFilter;
         })
@@ -2586,7 +2774,9 @@ const BudgetDashboard = () => {
         .filter((expense) => {
           const expenseDate = new Date(expense.date);
           const matchesCategory = expense.category === category;
-          const matchesMonth = expenseDate.getMonth() === selectedMonth;
+          const matchesMonth =
+            expenseDate.getMonth() === selectedMonth &&
+            expenseDate.getFullYear() === selectedYear;
           const matchesDateFilter = !filterDate || expense.date === filterDate;
           return matchesCategory && matchesMonth && matchesDateFilter;
         })
@@ -2597,7 +2787,9 @@ const BudgetDashboard = () => {
         .filter((refund) => {
           const refundDate = new Date(refund.date);
           const matchesCategory = refund.category === category;
-          const matchesMonth = refundDate.getMonth() === selectedMonth;
+          const matchesMonth =
+            refundDate.getMonth() === selectedMonth &&
+            refundDate.getFullYear() === selectedYear;
           const matchesDateFilter = !filterDate || refund.date === filterDate;
           return matchesCategory && matchesMonth && matchesDateFilter;
         })
@@ -2612,7 +2804,9 @@ const BudgetDashboard = () => {
         .filter((refund) => {
           const refundDate = new Date(refund.date);
           const matchesCategory = refund.category === category;
-          const matchesMonth = refundDate.getMonth() === selectedMonth;
+          const matchesMonth =
+            refundDate.getMonth() === selectedMonth &&
+            refundDate.getFullYear() === selectedYear;
           const matchesDateFilter = !filterDate || refund.date === filterDate;
           return matchesCategory && matchesMonth && matchesDateFilter;
         })
@@ -2637,7 +2831,9 @@ const BudgetDashboard = () => {
         .filter((expense) => {
           const expenseDate = new Date(expense.date);
           const matchesCategory = expense.category === category;
-          const matchesMonth = expenseDate.getMonth() === selectedMonth;
+          const matchesMonth =
+            expenseDate.getMonth() === selectedMonth &&
+            expenseDate.getFullYear() === selectedYear;
           const matchesDateFilter = !filterDate || expense.date === filterDate;
           return matchesCategory && matchesMonth && matchesDateFilter;
         })
@@ -2647,7 +2843,9 @@ const BudgetDashboard = () => {
         .filter((refund) => {
           const refundDate = new Date(refund.date);
           const matchesCategory = refund.category === category;
-          const matchesMonth = refundDate.getMonth() === selectedMonth;
+          const matchesMonth =
+            refundDate.getMonth() === selectedMonth &&
+            refundDate.getFullYear() === selectedYear;
           const matchesDateFilter = !filterDate || refund.date === filterDate;
           return matchesCategory && matchesMonth && matchesDateFilter;
         })
@@ -2853,6 +3051,43 @@ const BudgetDashboard = () => {
     );
   };
 
+  // Show loading state while fetching data
+  if (dataLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-bg p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading your budget data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show connection status if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-bg p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="text-center py-12">
+            <Card className="max-w-md mx-auto">
+              <CardContent className="pt-6">
+                <UserCheck className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">
+                  Authentication Required
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Please sign in to access your budget data stored in Supabase.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-bg">
       {/* Header */}
@@ -2863,9 +3098,27 @@ const BudgetDashboard = () => {
               <div className="bg-gradient-primary p-2 rounded-lg">
                 <Wallet className="h-6 w-6 text-primary-foreground" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground">
-                Budget Tracker
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-foreground">
+                  Budget Tracker
+                </h1>
+                {user && budgetConfig?.id !== "local" ? (
+                  <Badge variant="default" className="text-xs bg-success">
+                    Supabase Connected
+                  </Badge>
+                ) : user && budgetConfig?.id === "local" ? (
+                  <Badge
+                    variant="secondary"
+                    className="text-xs bg-warning text-warning-foreground"
+                  >
+                    Offline Mode
+                  </Badge>
+                ) : (
+                  <Badge variant="destructive" className="text-xs">
+                    Local Mode Only
+                  </Badge>
+                )}
+              </div>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-muted-foreground">
@@ -2919,10 +3172,20 @@ const BudgetDashboard = () => {
                   </option>
                 ))}
               </select>
-              <Button variant="outline" size="sm">
-                <Calendar className="h-4 w-4 mr-2" />
-                {new Date().getFullYear()}
-              </Button>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                {Array.from(
+                  { length: 10 },
+                  (_, i) => new Date().getFullYear() - 5 + i,
+                ).map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
@@ -2965,6 +3228,38 @@ const BudgetDashboard = () => {
           />
         </div>
 
+        {/* No Data Message */}
+        {!allocatedAmounts.hasData && (
+          <Card className="border-muted-foreground/20 bg-muted/5 mb-6">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-2">
+                <div className="mx-auto w-12 h-12 bg-muted/20 rounded-full flex items-center justify-center">
+                  <Calendar className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold text-lg text-muted-foreground">
+                  No Data for {monthNames[selectedMonth]} {selectedYear}
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  There are no transactions recorded for this month and year.
+                  Budget allocations are only shown for months with actual
+                  financial activity or the current month.
+                </p>
+                <div className="text-xs text-muted-foreground mt-3">
+                  <p>💡 Budget plans are displayed when:</p>
+                  <p>
+                    • It's the current month (
+                    {monthNames[new Date().getMonth()]}{" "}
+                    {new Date().getFullYear()})
+                  </p>
+                  <p>
+                    • There are recorded transactions for the selected period
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Main Navigation Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-7 bg-muted p-1 rounded-lg">
@@ -2991,9 +3286,12 @@ const BudgetDashboard = () => {
               <TrendingUp className="h-4 w-4" />
               <span className="hidden sm:inline">Investments</span>
             </TabsTrigger>
-            <TabsTrigger value="bank" className="flex items-center gap-2">
+            <TabsTrigger
+              value="transactions"
+              className="flex items-center gap-2"
+            >
               <CreditCard className="h-4 w-4" />
-              <span className="hidden sm:inline">Bank</span>
+              <span className="hidden sm:inline">Bank & Transactions</span>
             </TabsTrigger>
             <TabsTrigger
               value="config"
@@ -3007,6 +3305,125 @@ const BudgetDashboard = () => {
 
           <TabsContent value="overview">
             <div className="space-y-6">
+              {/* Data Source Status */}
+              {!user && (
+                <Card className="border-warning/50 bg-warning/5">
+                  <CardContent className="pt-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-warning/20 rounded-lg">
+                        <UserCheck className="h-5 w-5 text-warning" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-warning mb-2">
+                          Supabase Integration Required
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Your data is currently stored locally. For full
+                          functionality including proper month/year filtering
+                          and data synchronization, you need to set up Supabase:
+                        </p>
+                        <div className="bg-background/50 rounded-lg p-3 mb-3">
+                          <h4 className="font-medium text-sm mb-2">
+                            Quick Setup:
+                          </h4>
+                          <ol className="text-xs text-muted-foreground list-decimal list-inside space-y-1">
+                            <li>
+                              Create a Supabase project at{" "}
+                              <code className="bg-muted px-1 rounded">
+                                supabase.com
+                              </code>
+                            </li>
+                            <li>
+                              Add environment variables to{" "}
+                              <code className="bg-muted px-1 rounded">
+                                .env.local
+                              </code>
+                              :
+                            </li>
+                            <div className="bg-muted/50 p-2 rounded mt-1 mb-1">
+                              <code className="text-xs">
+                                VITE_SUPABASE_URL=your_project_url
+                                <br />
+                                VITE_SUPABASE_ANON_KEY=your_anon_key
+                              </code>
+                            </div>
+                            <li>
+                              Run database migrations:{" "}
+                              <code className="bg-muted px-1 rounded">
+                                supabase db push
+                              </code>
+                            </li>
+                            <li>Restart the application</li>
+                          </ol>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          See <code>SUPABASE_SETUP.md</code> for detailed
+                          instructions
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {user && budgetConfig?.id !== "local" && (
+                <Card className="border-success/50 bg-success/5">
+                  <CardContent className="pt-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-success/20 rounded-lg">
+                        <UserCheck className="h-5 w-5 text-success" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-success mb-1">
+                          Supabase Connected
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Your data is now synchronized with Supabase and will
+                          update when you change months or years. All budget
+                          configurations and transactions are saved to the
+                          cloud.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {user && budgetConfig?.id === "local" && (
+                <Card className="border-warning/50 bg-warning/5">
+                  <CardContent className="pt-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-warning/20 rounded-lg">
+                        <Lock className="h-5 w-5 text-warning" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-warning mb-1">
+                          Running in Offline Mode
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Supabase connection failed. Using local data for now.
+                        </p>
+                        <div className="text-xs text-muted-foreground space-y-1">
+                          <p>💡 Common fixes:</p>
+                          <p>• Check if your Supabase project is active</p>
+                          <p>• Free tier projects pause after inactivity</p>
+                          <p>
+                            • Visit{" "}
+                            <a
+                              href="https://supabase.com/dashboard"
+                              target="_blank"
+                              className="text-primary hover:underline"
+                            >
+                              Supabase Dashboard
+                            </a>{" "}
+                            to wake it up
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
               {/* Budget Category Progress Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <CategoryProgressCard
@@ -3278,62 +3695,403 @@ const BudgetDashboard = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="bank">
+          <TabsContent value="transactions">
             <div className="space-y-6">
+              {/* Bank Balance Section - Only for Individual Users */}
+              {currentUser !== "combined" && (
+                <Card className="shadow-card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-primary">
+                      <CreditCard className="h-6 w-6" />
+                      Bank Balance Tracker
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Track your bank balance and see how your expenses affect
+                      it throughout the month
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <BankBalanceTracker />
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Transactions Statement */}
               <Card className="shadow-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-primary">
                     <CreditCard className="h-6 w-6" />
-                    Bank Balance Tracker
+                    Transaction Statement
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Track your bank balance and see how your expenses affect it
-                    throughout the month
+                    All transactions for {monthNames[selectedMonth]}{" "}
+                    {selectedYear} -{" "}
+                    {currentUser === "combined"
+                      ? "Combined View"
+                      : currentProfile.name}
                   </p>
                 </CardHeader>
                 <CardContent>
-                  {currentUser === "combined" ? (
-                    <div className="text-center py-12">
-                      <Card className="max-w-md mx-auto">
-                        <CardContent className="pt-6">
-                          <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                          <h3 className="text-lg font-semibold mb-2">
-                            Combined View Active
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            Bank balance tracking is not available in combined
-                            view. Please switch to an individual profile to
-                            track your bank balance.
-                          </p>
-                          <div className="flex justify-center">
-                            <ToggleGroup
-                              type="single"
-                              value={currentUser}
-                              onValueChange={handleProfileChange}
-                              className="border border-border rounded-md"
-                            >
-                              <ToggleGroupItem
-                                value="murali"
-                                aria-label="Murali's Profile"
-                                className="text-xs px-3 py-1"
-                              >
-                                Murali
-                              </ToggleGroupItem>
-                              <ToggleGroupItem
-                                value="valar"
-                                aria-label="Valar's Profile"
-                                className="text-xs px-3 py-1"
-                              >
-                                Valar
-                              </ToggleGroupItem>
-                            </ToggleGroup>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  ) : (
-                    <BankBalanceTracker />
-                  )}
+                  {(() => {
+                    // Get all transactions
+                    let allTransactions = [];
+
+                    if (currentUser === "combined") {
+                      // Combine transactions from both users
+                      const muraliExpenses = profiles.murali.expenses
+                        .filter((expense) => {
+                          const expenseDate = new Date(expense.date);
+                          return (
+                            expenseDate.getMonth() === selectedMonth &&
+                            expenseDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((expense) => ({
+                          ...expense,
+                          type: "expense",
+                          user: "Murali",
+                        }));
+                      const valarExpenses = profiles.valar.expenses
+                        .filter((expense) => {
+                          const expenseDate = new Date(expense.date);
+                          return (
+                            expenseDate.getMonth() === selectedMonth &&
+                            expenseDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((expense) => ({
+                          ...expense,
+                          type: "expense",
+                          user: "Valar",
+                        }));
+                      const muraliRefunds = profiles.murali.refunds
+                        .filter((refund) => {
+                          const refundDate = new Date(refund.date);
+                          return (
+                            refundDate.getMonth() === selectedMonth &&
+                            refundDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((refund) => ({
+                          ...refund,
+                          type: "refund",
+                          user: "Murali",
+                        }));
+                      const valarRefunds = profiles.valar.refunds
+                        .filter((refund) => {
+                          const refundDate = new Date(refund.date);
+                          return (
+                            refundDate.getMonth() === selectedMonth &&
+                            refundDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((refund) => ({
+                          ...refund,
+                          type: "refund",
+                          user: "Valar",
+                        }));
+                      const muraliInvestments =
+                        profiles.murali.investmentEntries
+                          .filter((investment) => {
+                            const investmentDate = new Date(investment.date);
+                            return (
+                              investmentDate.getMonth() === selectedMonth &&
+                              investmentDate.getFullYear() === selectedYear
+                            );
+                          })
+                          .map((investment) => ({
+                            ...investment,
+                            type: "investment",
+                            user: "Murali",
+                            category: "investments",
+                          }));
+                      const valarInvestments = profiles.valar.investmentEntries
+                        .filter((investment) => {
+                          const investmentDate = new Date(investment.date);
+                          return (
+                            investmentDate.getMonth() === selectedMonth &&
+                            investmentDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((investment) => ({
+                          ...investment,
+                          type: "investment",
+                          user: "Valar",
+                          category: "investments",
+                        }));
+
+                      allTransactions = [
+                        ...muraliExpenses,
+                        ...valarExpenses,
+                        ...muraliRefunds,
+                        ...valarRefunds,
+                        ...muraliInvestments,
+                        ...valarInvestments,
+                      ];
+                    } else {
+                      // Single user transactions
+                      const expenses = currentProfile.expenses
+                        .filter((expense) => {
+                          const expenseDate = new Date(expense.date);
+                          return (
+                            expenseDate.getMonth() === selectedMonth &&
+                            expenseDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((expense) => ({
+                          ...expense,
+                          type: "expense",
+                          user: currentProfile.name,
+                        }));
+                      const refunds = currentProfile.refunds
+                        .filter((refund) => {
+                          const refundDate = new Date(refund.date);
+                          return (
+                            refundDate.getMonth() === selectedMonth &&
+                            refundDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((refund) => ({
+                          ...refund,
+                          type: "refund",
+                          user: currentProfile.name,
+                        }));
+                      const investments = currentProfile.investmentEntries
+                        .filter((investment) => {
+                          const investmentDate = new Date(investment.date);
+                          return (
+                            investmentDate.getMonth() === selectedMonth &&
+                            investmentDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((investment) => ({
+                          ...investment,
+                          type: "investment",
+                          user: currentProfile.name,
+                          category: "investments",
+                        }));
+
+                      allTransactions = [
+                        ...expenses,
+                        ...refunds,
+                        ...investments,
+                      ];
+                    }
+
+                    // Sort by date (newest first)
+                    allTransactions.sort(
+                      (a, b) =>
+                        new Date(b.date).getTime() - new Date(a.date).getTime(),
+                    );
+
+                    return allTransactions.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Wallet className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>
+                          No transactions found for {monthNames[selectedMonth]}{" "}
+                          {selectedYear}
+                        </p>
+                        <p className="text-sm">
+                          Add some expenses, refunds, or investments to see them
+                          here
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {/* Summary Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                          <Card className="bg-destructive/10 border-destructive/20">
+                            <CardContent className="pt-4">
+                              <div className="flex items-center justify-between">
+                                <Home className="h-5 w-5 text-destructive" />
+                                <div className="text-right">
+                                  <p className="text-sm text-muted-foreground">
+                                    Need Expenses
+                                  </p>
+                                  <p className="text-lg font-bold text-destructive">
+                                    ₹
+                                    {allTransactions
+                                      .filter(
+                                        (t) =>
+                                          t.type === "expense" &&
+                                          t.category === "need",
+                                      )
+                                      .reduce((sum, t) => sum + t.amount, 0)
+                                      .toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          <Card className="bg-warning/10 border-warning/20">
+                            <CardContent className="pt-4">
+                              <div className="flex items-center justify-between">
+                                <Music className="h-5 w-5 text-warning" />
+                                <div className="text-right">
+                                  <p className="text-sm text-muted-foreground">
+                                    Want Expenses
+                                  </p>
+                                  <p className="text-lg font-bold text-warning">
+                                    ₹
+                                    {allTransactions
+                                      .filter(
+                                        (t) =>
+                                          t.type === "expense" &&
+                                          t.category === "want",
+                                      )
+                                      .reduce((sum, t) => sum + t.amount, 0)
+                                      .toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          <Card className="bg-success/10 border-success/20">
+                            <CardContent className="pt-4">
+                              <div className="flex items-center justify-between">
+                                <PiggyBank className="h-5 w-5 text-success" />
+                                <div className="text-right">
+                                  <p className="text-sm text-muted-foreground">
+                                    Savings
+                                  </p>
+                                  <p className="text-lg font-bold text-success">
+                                    ₹
+                                    {allTransactions
+                                      .filter(
+                                        (t) =>
+                                          t.type === "expense" &&
+                                          t.category === "savings",
+                                      )
+                                      .reduce((sum, t) => sum + t.amount, 0)
+                                      .toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          <Card className="bg-primary/10 border-primary/20">
+                            <CardContent className="pt-4">
+                              <div className="flex items-center justify-between">
+                                <TrendingUp className="h-5 w-5 text-primary" />
+                                <div className="text-right">
+                                  <p className="text-sm text-muted-foreground">
+                                    Investments
+                                  </p>
+                                  <p className="text-lg font-bold text-primary">
+                                    ₹
+                                    {allTransactions
+                                      .filter(
+                                        (t) =>
+                                          t.type === "investment" ||
+                                          (t.type === "expense" &&
+                                            t.category === "investments"),
+                                      )
+                                      .reduce((sum, t) => sum + t.amount, 0)
+                                      .toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        {/* Transactions Table */}
+                        <div className="rounded-md border">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Type</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead>Category</TableHead>
+                                <TableHead>Tag</TableHead>
+                                {currentUser === "combined" && (
+                                  <TableHead>User</TableHead>
+                                )}
+                                <TableHead className="text-right">
+                                  Amount
+                                </TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {allTransactions.map((transaction, index) => (
+                                <TableRow
+                                  key={`${transaction.type}-${transaction.id || index}`}
+                                >
+                                  <TableCell className="font-medium">
+                                    {new Date(
+                                      transaction.date,
+                                    ).toLocaleDateString("en-IN")}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge
+                                      variant={
+                                        transaction.type === "expense"
+                                          ? "destructive"
+                                          : transaction.type === "refund"
+                                            ? "default"
+                                            : "secondary"
+                                      }
+                                    >
+                                      {transaction.type === "expense"
+                                        ? "Expense"
+                                        : transaction.type === "refund"
+                                          ? "Refund"
+                                          : "Investment"}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    {transaction.type === "investment"
+                                      ? transaction.notes || "Investment Entry"
+                                      : transaction.spentFor ||
+                                        transaction.refundFor ||
+                                        "N/A"}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge
+                                      className={getTagColor(
+                                        transaction.category || "investments",
+                                      )}
+                                      variant="outline"
+                                    >
+                                      {transaction.category || "investments"}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    {transaction.tag && (
+                                      <Badge
+                                        className={getTagColor(transaction.tag)}
+                                        variant="outline"
+                                      >
+                                        {transaction.tag}
+                                      </Badge>
+                                    )}
+                                  </TableCell>
+                                  {currentUser === "combined" && (
+                                    <TableCell>
+                                      <Badge variant="outline">
+                                        {transaction.user}
+                                      </Badge>
+                                    </TableCell>
+                                  )}
+                                  <TableCell
+                                    className={`text-right font-semibold ${
+                                      transaction.type === "refund"
+                                        ? "text-success"
+                                        : "text-foreground"
+                                    }`}
+                                  >
+                                    {transaction.type === "refund" ? "+" : "-"}₹
+                                    {transaction.amount.toLocaleString()}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             </div>
@@ -3389,6 +4147,7 @@ const BudgetDashboard = () => {
                 currentInvestmentPlan={currentProfile.investmentPlan}
                 isAuthenticated={isConfigAuthenticated}
                 setIsAuthenticated={setIsConfigAuthenticated}
+                currentProfile={currentProfile}
               />
             )}
           </TabsContent>

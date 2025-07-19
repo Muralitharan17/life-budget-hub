@@ -18,9 +18,14 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 
 interface SalaryConfigProps {
-  onSalaryUpdate: (salary: number, budgetPercentage: number) => void;
+  onSalaryUpdate: (
+    salary: number,
+    budgetPercentage: number,
+    allocation: BudgetAllocation,
+  ) => void;
   currentSalary?: number;
   currentBudgetPercentage?: number;
+  currentBudgetAllocation?: BudgetAllocation;
 }
 
 interface BudgetAllocation {
@@ -33,7 +38,8 @@ interface BudgetAllocation {
 const SalaryConfig = ({
   onSalaryUpdate,
   currentSalary = 0,
-  currentBudgetPercentage = 70,
+  currentBudgetPercentage = 0,
+  currentBudgetAllocation,
 }: SalaryConfigProps) => {
   const [actualSalary, setActualSalary] = useState(currentSalary);
   const [budgetPercentage, setBudgetPercentage] = useState(
@@ -41,13 +47,15 @@ const SalaryConfig = ({
   );
   const [showSalary, setShowSalary] = useState(false);
 
-  // Budget allocation percentages (default 50/30/20 rule modified)
-  const [budgetAllocation, setBudgetAllocation] = useState<BudgetAllocation>({
-    need: 50, // Essential expenses
-    want: 30, // Discretionary spending
-    savings: 15, // Emergency fund, short-term savings
-    investments: 5, // Long-term investments
-  });
+  // Budget allocation percentages - use current or zero defaults
+  const [budgetAllocation, setBudgetAllocation] = useState<BudgetAllocation>(
+    currentBudgetAllocation || {
+      need: 0, // Essential expenses
+      want: 0, // Discretionary spending
+      savings: 0, // Emergency fund, short-term savings
+      investments: 0, // Long-term investments
+    },
+  );
 
   const { toast } = useToast();
 
@@ -99,14 +107,11 @@ const SalaryConfig = ({
       return;
     }
 
-    onSalaryUpdate(actualSalary, budgetPercentage);
-
-    // Save budget allocation to localStorage
-    localStorage.setItem("budgetAllocation", JSON.stringify(budgetAllocation));
+    onSalaryUpdate(actualSalary, budgetPercentage, budgetAllocation);
 
     toast({
       title: "Configuration Saved",
-      description: `Salary: ₹${actualSalary.toLocaleString()}, Budget: ${budgetPercentage}% with allocation breakdown saved.`,
+      description: `Complete budget configuration saved successfully.`,
       variant: "default",
     });
   };
@@ -128,28 +133,20 @@ const SalaryConfig = ({
   const totalAllocationPercentage = getTotalAllocationPercentage();
   const isAllocationValid = totalAllocationPercentage === 100;
 
-  // Preset allocation templates
-  const allocationPresets = {
-    "50/30/20 Rule": { need: 50, want: 30, savings: 15, investments: 5 },
-    Conservative: { need: 60, want: 20, savings: 15, investments: 5 },
-    "Aggressive Saver": { need: 40, want: 20, savings: 25, investments: 15 },
-    "Investor Focus": { need: 45, want: 25, savings: 10, investments: 20 },
-  };
-
   return (
-    <div className="space-y-6">
-      {/* Salary Configuration */}
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-primary">
-            <DollarSign className="h-6 w-6" />
-            Salary Configuration
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Configure your actual salary and budget allocation percentage
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-6">
+    <Card className="shadow-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-primary">
+          <Calculator className="h-6 w-6" />
+          Complete Budget Configuration
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Configure your salary, budget percentage, and allocation breakdown
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-8">
+        {/* Salary and Budget Percentage Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Actual Salary Input */}
           <div className="space-y-2">
             <Label htmlFor="salary">Monthly Salary</Label>
@@ -157,8 +154,12 @@ const SalaryConfig = ({
               <Input
                 id="salary"
                 type={showSalary ? "number" : "password"}
-                value={actualSalary || ""}
-                onChange={(e) => setActualSalary(Number(e.target.value))}
+                value={actualSalary === 0 ? "" : actualSalary}
+                onChange={(e) =>
+                  setActualSalary(
+                    e.target.value === "" ? 0 : Number(e.target.value),
+                  )
+                }
                 placeholder="Enter your monthly salary"
                 className="pr-10"
               />
@@ -190,8 +191,12 @@ const SalaryConfig = ({
                 type="number"
                 min="1"
                 max="100"
-                value={budgetPercentage}
-                onChange={(e) => setBudgetPercentage(Number(e.target.value))}
+                value={budgetPercentage === 0 ? "" : budgetPercentage}
+                onChange={(e) =>
+                  setBudgetPercentage(
+                    e.target.value === "" ? 0 : Number(e.target.value),
+                  )
+                }
                 placeholder="70"
                 className="flex-1"
               />
@@ -201,59 +206,18 @@ const SalaryConfig = ({
               Percentage of salary to allocate for monthly budget
             </p>
           </div>
+        </div>
 
-          {/* Quick Percentage Presets */}
-          <div className="space-y-2">
-            <Label>Quick Percentage Presets</Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {[50, 60, 70, 80].map((preset) => (
-                <Button
-                  key={preset}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setBudgetPercentage(preset)}
-                  className={
-                    budgetPercentage === preset
-                      ? "bg-primary text-primary-foreground"
-                      : ""
-                  }
-                >
-                  {preset}%
-                </Button>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Budget Allocation Configuration */}
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-secondary">
-            <Calculator className="h-6 w-6" />
-            Budget Allocation Breakdown
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Allocate your budget across different categories (must total 100%)
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Allocation Presets */}
-          <div className="space-y-2">
-            <Label>Allocation Templates</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {Object.entries(allocationPresets).map(([name, preset]) => (
-                <Button
-                  key={name}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setBudgetAllocation(preset)}
-                  className="text-xs"
-                >
-                  {name}
-                </Button>
-              ))}
-            </div>
+        {/* Budget Allocation Section */}
+        <div className="space-y-6">
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-secondary" />
+              Budget Allocation Breakdown
+            </h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              Allocate your budget across different categories (must total 100%)
+            </p>
           </div>
 
           {/* Individual Allocation Inputs */}
@@ -269,11 +233,17 @@ const SalaryConfig = ({
                   type="number"
                   min="0"
                   max="100"
-                  value={budgetAllocation.need}
+                  value={
+                    budgetAllocation.need === 0 ? "" : budgetAllocation.need
+                  }
                   onChange={(e) =>
-                    handleAllocationChange("need", Number(e.target.value))
+                    handleAllocationChange(
+                      "need",
+                      e.target.value === "" ? 0 : Number(e.target.value),
+                    )
                   }
                   className="flex-1"
+                  placeholder="0"
                 />
                 <Percent className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -293,11 +263,17 @@ const SalaryConfig = ({
                   type="number"
                   min="0"
                   max="100"
-                  value={budgetAllocation.want}
+                  value={
+                    budgetAllocation.want === 0 ? "" : budgetAllocation.want
+                  }
                   onChange={(e) =>
-                    handleAllocationChange("want", Number(e.target.value))
+                    handleAllocationChange(
+                      "want",
+                      e.target.value === "" ? 0 : Number(e.target.value),
+                    )
                   }
                   className="flex-1"
+                  placeholder="0"
                 />
                 <Percent className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -317,11 +293,19 @@ const SalaryConfig = ({
                   type="number"
                   min="0"
                   max="100"
-                  value={budgetAllocation.savings}
+                  value={
+                    budgetAllocation.savings === 0
+                      ? ""
+                      : budgetAllocation.savings
+                  }
                   onChange={(e) =>
-                    handleAllocationChange("savings", Number(e.target.value))
+                    handleAllocationChange(
+                      "savings",
+                      e.target.value === "" ? 0 : Number(e.target.value),
+                    )
                   }
                   className="flex-1"
+                  placeholder="0"
                 />
                 <Percent className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -341,14 +325,19 @@ const SalaryConfig = ({
                   type="number"
                   min="0"
                   max="100"
-                  value={budgetAllocation.investments}
+                  value={
+                    budgetAllocation.investments === 0
+                      ? ""
+                      : budgetAllocation.investments
+                  }
                   onChange={(e) =>
                     handleAllocationChange(
                       "investments",
-                      Number(e.target.value),
+                      e.target.value === "" ? 0 : Number(e.target.value),
                     )
                   }
                   className="flex-1"
+                  placeholder="0"
                 />
                 <Percent className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -360,49 +349,67 @@ const SalaryConfig = ({
 
           {/* Total Allocation Indicator */}
           <div
-            className={`p-3 rounded-lg border ${
+            className={`p-4 rounded-lg border-2 ${
               isAllocationValid
-                ? "bg-success/10 border-success/30 text-success-foreground"
-                : "bg-destructive/10 border-destructive/30 text-destructive-foreground"
+                ? "bg-success/20 border-success/50"
+                : "bg-warning/20 border-warning/50"
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="font-medium">Total Allocation:</span>
-              <span className="font-bold text-lg">
+              <span
+                className={`font-semibold text-lg ${
+                  isAllocationValid
+                    ? "text-success"
+                    : "text-orange-700 dark:text-orange-400"
+                }`}
+              >
+                Total Allocation:
+              </span>
+              <span
+                className={`font-bold text-2xl ${
+                  isAllocationValid
+                    ? "text-success"
+                    : "text-orange-700 dark:text-orange-400"
+                }`}
+              >
                 {totalAllocationPercentage}%
               </span>
             </div>
             {!isAllocationValid && (
-              <p className="text-sm mt-1">
+              <p
+                className={`text-base mt-2 font-semibold ${
+                  totalAllocationPercentage > 100
+                    ? "text-destructive"
+                    : "text-blue-700 dark:text-blue-400"
+                }`}
+              >
                 {totalAllocationPercentage > 100
-                  ? `Reduce by ${totalAllocationPercentage - 100}%`
-                  : `Add ${100 - totalAllocationPercentage}% more`}
+                  ? `⚠️ Reduce by ${totalAllocationPercentage - 100}%`
+                  : `⚠️ Add ${100 - totalAllocationPercentage}% more`}
               </p>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Budget Calculation Preview */}
-      {actualSalary > 0 && budgetPercentage > 0 && (
-        <Card className="bg-gradient-to-r from-primary/5 to-success/5 border-primary/20">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Calculator className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-primary">
+        {/* Budget Preview Section */}
+        {actualSalary > 0 && budgetPercentage > 0 && (
+          <div className="space-y-6">
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Calculator className="h-5 w-5 text-primary" />
                 Complete Budget Breakdown
               </h3>
             </div>
 
             {/* Main Budget Info */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="text-center">
+              <div className="text-center p-4 bg-background/50 rounded-lg border">
                 <p className="text-sm text-muted-foreground">Monthly Salary</p>
                 <p className="text-lg font-bold text-foreground">
                   ₹{actualSalary.toLocaleString()}
                 </p>
               </div>
-              <div className="text-center">
+              <div className="text-center p-4 bg-background/50 rounded-lg border">
                 <p className="text-sm text-muted-foreground">
                   Budget Allocation
                 </p>
@@ -410,7 +417,7 @@ const SalaryConfig = ({
                   {budgetPercentage}%
                 </p>
               </div>
-              <div className="text-center">
+              <div className="text-center p-4 bg-background/50 rounded-lg border">
                 <p className="text-sm text-muted-foreground">Total Budget</p>
                 <p className="text-lg font-bold text-success">
                   ₹{calculatedBudget.toLocaleString()}
@@ -474,30 +481,30 @@ const SalaryConfig = ({
             </div>
 
             {/* Remaining Amount */}
-            <div className="p-3 bg-background/50 rounded-lg">
+            <div className="p-3 bg-muted/30 rounded-lg">
               <p className="text-sm text-muted-foreground">
                 <strong>Remaining Amount:</strong> ₹
-                {(actualSalary - calculatedBudget).toLocaleString()}(
+                {(actualSalary - calculatedBudget).toLocaleString()} (
                 {100 - budgetPercentage}% - for emergency funds, extra savings,
                 etc.)
               </p>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
 
-      {/* Save Button */}
-      <Button
-        onClick={handleSaveConfiguration}
-        className="w-full"
-        variant="success"
-        size="lg"
-        disabled={!isAllocationValid}
-      >
-        <Save className="h-4 w-4 mr-2" />
-        Save Complete Configuration
-      </Button>
-    </div>
+        {/* Save Button */}
+        <Button
+          onClick={handleSaveConfiguration}
+          className="w-full"
+          variant="default"
+          size="lg"
+          disabled={!isAllocationValid}
+        >
+          <Save className="h-4 w-4 mr-2" />
+          Save Complete Configuration
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 
