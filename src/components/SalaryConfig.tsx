@@ -39,6 +39,7 @@ const SalaryConfig = ({
   onSalaryUpdate,
   currentSalary = 0,
   currentBudgetPercentage = 70,
+  currentBudgetAllocation,
 }: SalaryConfigProps) => {
   const [actualSalary, setActualSalary] = useState(currentSalary);
   const [budgetPercentage, setBudgetPercentage] = useState(
@@ -46,13 +47,15 @@ const SalaryConfig = ({
   );
   const [showSalary, setShowSalary] = useState(false);
 
-  // Budget allocation percentages (default 50/30/20 rule modified)
-  const [budgetAllocation, setBudgetAllocation] = useState<BudgetAllocation>({
-    need: 50, // Essential expenses
-    want: 30, // Discretionary spending
-    savings: 15, // Emergency fund, short-term savings
-    investments: 5, // Long-term investments
-  });
+  // Budget allocation percentages - use current or default
+  const [budgetAllocation, setBudgetAllocation] = useState<BudgetAllocation>(
+    currentBudgetAllocation || {
+      need: 50, // Essential expenses
+      want: 30, // Discretionary spending
+      savings: 15, // Emergency fund, short-term savings
+      investments: 5, // Long-term investments
+    },
+  );
 
   const { toast } = useToast();
 
