@@ -1143,8 +1143,7 @@ const BudgetDashboard = () => {
   };
 
   const calculateCurrentBalance = () => {
-    const currentYear = new Date().getFullYear();
-    const openingBalance = getOpeningBalance(selectedMonth, currentYear);
+    const openingBalance = getOpeningBalance(selectedMonth, selectedYear);
     const expenses = getCurrentMonthExpensesByCategory();
     const totalExpenses =
       expenses.need + expenses.want + expenses.savings + expenses.investments;
