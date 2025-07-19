@@ -491,7 +491,10 @@ const BudgetDashboard = () => {
     } else {
       currentMonthEntries = currentProfile.investmentEntries.filter((entry) => {
         const entryDate = new Date(entry.date);
-        return entryDate.getMonth() === selectedMonth;
+        return (
+          entryDate.getMonth() === selectedMonth &&
+          entryDate.getFullYear() === selectedYear
+        );
       });
     }
 
