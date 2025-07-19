@@ -8,7 +8,7 @@ type InvestmentPortfolio =
   Database["public"]["Tables"]["investment_portfolios"]["Row"];
 type Transaction = Database["public"]["Tables"]["transactions"]["Row"];
 
-export function useBudgetData() {
+export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
   const { user } = useAuth();
   const [budgetConfig, setBudgetConfig] = useState<BudgetConfig | null>(null);
   const [portfolios, setPortfolios] = useState<InvestmentPortfolio[]>([]);
@@ -179,13 +179,30 @@ export function useBudgetData() {
         setPortfolios(portfolioData || []);
       }
 
-      // Fetch recent transactions
-      const { data: transactionData, error: transactionError } = await supabase
+      // Fetch transactions filtered by month/year if provided
+      let transactionQuery = supabase
         .from("transactions")
         .select("*")
         .eq("user_id", user.id)
-        .order("date", { ascending: false })
-        .limit(50);
+        .order("date", { ascending: false });
+
+      // Add month/year filtering if provided
+      if (selectedMonth !== undefined && selectedYear !== undefined) {
+        const startDate = new Date(selectedYear, selectedMonth, 1)
+          .toISOString()
+          .split("T")[0];
+        const endDate = new Date(selectedYear, selectedMonth + 1, 0)
+          .toISOString()
+          .split("T")[0];
+        transactionQuery = transactionQuery
+          .gte("date", startDate)
+          .lte("date", endDate);
+      } else {
+        transactionQuery = transactionQuery.limit(50);
+      }
+
+      const { data: transactionData, error: transactionError } =
+        await transactionQuery;
 
       if (transactionError) {
         console.error("Error fetching transactions:");
@@ -226,7 +243,7 @@ export function useBudgetData() {
     } finally {
       setLoading(false);
     }
-  }, [user, isSupabaseConfigured]);
+  }, [user, isSupabaseConfigured, selectedMonth, selectedYear]);
 
   const saveBudgetConfig = async (
     config: Omit<BudgetConfig, "id" | "user_id" | "created_at" | "updated_at">,
