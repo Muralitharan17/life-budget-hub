@@ -3194,28 +3194,52 @@ const BudgetDashboard = () => {
                         <UserCheck className="h-5 w-5 text-warning" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-warning mb-1">
-                          Using Local Data Only
+                        <h3 className="font-semibold text-warning mb-2">
+                          Supabase Integration Required
                         </h3>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Your data is currently stored locally in your browser.
-                          To sync data across devices and ensure proper
-                          month/year filtering from Supabase:
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Your data is currently stored locally. For full
+                          functionality including proper month/year filtering
+                          and data synchronization, you need to set up Supabase:
                         </p>
-                        <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                          <li>
-                            Sign in to your account to enable Supabase
-                            integration
-                          </li>
-                          <li>
-                            Configure your Supabase credentials
-                            (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY)
-                          </li>
-                          <li>
-                            Data will then be properly filtered by month and
-                            year from the database
-                          </li>
-                        </ul>
+                        <div className="bg-background/50 rounded-lg p-3 mb-3">
+                          <h4 className="font-medium text-sm mb-2">
+                            Quick Setup:
+                          </h4>
+                          <ol className="text-xs text-muted-foreground list-decimal list-inside space-y-1">
+                            <li>
+                              Create a Supabase project at{" "}
+                              <code className="bg-muted px-1 rounded">
+                                supabase.com
+                              </code>
+                            </li>
+                            <li>
+                              Add environment variables to{" "}
+                              <code className="bg-muted px-1 rounded">
+                                .env.local
+                              </code>
+                              :
+                            </li>
+                            <div className="bg-muted/50 p-2 rounded mt-1 mb-1">
+                              <code className="text-xs">
+                                VITE_SUPABASE_URL=your_project_url
+                                <br />
+                                VITE_SUPABASE_ANON_KEY=your_anon_key
+                              </code>
+                            </div>
+                            <li>
+                              Run database migrations:{" "}
+                              <code className="bg-muted px-1 rounded">
+                                supabase db push
+                              </code>
+                            </li>
+                            <li>Restart the application</li>
+                          </ol>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          See <code>SUPABASE_SETUP.md</code> for detailed
+                          instructions
+                        </p>
                       </div>
                     </div>
                   </CardContent>
