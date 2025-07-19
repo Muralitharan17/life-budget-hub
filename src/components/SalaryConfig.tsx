@@ -18,9 +18,14 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 
 interface SalaryConfigProps {
-  onSalaryUpdate: (salary: number, budgetPercentage: number) => void;
+  onSalaryUpdate: (
+    salary: number,
+    budgetPercentage: number,
+    allocation: BudgetAllocation,
+  ) => void;
   currentSalary?: number;
   currentBudgetPercentage?: number;
+  currentBudgetAllocation?: BudgetAllocation;
 }
 
 interface BudgetAllocation {
