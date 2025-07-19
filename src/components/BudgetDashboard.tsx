@@ -401,12 +401,18 @@ const BudgetDashboard = () => {
     } else {
       currentMonthExpenses = currentProfile.expenses.filter((expense) => {
         const expenseDate = new Date(expense.date);
-        return expenseDate.getMonth() === selectedMonth;
+        return (
+          expenseDate.getMonth() === selectedMonth &&
+          expenseDate.getFullYear() === selectedYear
+        );
       });
 
       currentMonthRefunds = currentProfile.refunds.filter((refund) => {
         const refundDate = new Date(refund.date);
-        return refundDate.getMonth() === selectedMonth;
+        return (
+          refundDate.getMonth() === selectedMonth &&
+          refundDate.getFullYear() === selectedYear
+        );
       });
     }
 
