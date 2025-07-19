@@ -2231,7 +2231,7 @@ const BudgetDashboard = () => {
               <div className="text-center p-4 bg-background/50 rounded-lg">
                 <p className="text-sm text-muted-foreground">Opening Balance</p>
                 <p className="text-2xl font-bold text-primary">
-                  ���{balanceData.openingBalance.toLocaleString()}
+                  ₹{balanceData.openingBalance.toLocaleString()}
                 </p>
               </div>
               <div className="text-center p-4 bg-background/50 rounded-lg">
@@ -2697,7 +2697,9 @@ const BudgetDashboard = () => {
         .filter((refund) => {
           const refundDate = new Date(refund.date);
           const matchesCategory = refund.category === category;
-          const matchesMonth = refundDate.getMonth() === selectedMonth;
+          const matchesMonth =
+            refundDate.getMonth() === selectedMonth &&
+            refundDate.getFullYear() === selectedYear;
           const matchesDateFilter = !filterDate || refund.date === filterDate;
           return matchesCategory && matchesMonth && matchesDateFilter;
         })
