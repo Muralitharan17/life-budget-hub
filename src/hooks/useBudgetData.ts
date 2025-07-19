@@ -175,6 +175,14 @@ export function useBudgetData() {
           hint: transactionError.hint,
           code: transactionError.code,
         });
+
+        if (transactionError.code === "42P01") {
+          console.error(
+            '❌ Table "transactions" does not exist in your Supabase database',
+          );
+        } else if (transactionError.code === "PGRST301") {
+          console.error("❌ RLS is blocking access to transactions table");
+        }
       } else {
         setTransactions(transactionData || []);
       }
