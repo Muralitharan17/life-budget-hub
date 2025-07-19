@@ -339,7 +339,84 @@ const BudgetDashboard = () => {
           (currentProfile.salary * currentProfile.budgetPercentage) / 100,
         );
 
+  // Check if we have actual data for the selected month/year
+  const hasDataForSelectedMonth = () => {
+    const currentDate = new Date();
+    const isCurrentMonth =
+      selectedMonth === currentDate.getMonth() &&
+      selectedYear === currentDate.getFullYear();
+
+    // Always show budget plan for current month
+    if (isCurrentMonth) return true;
+
+    // For past/future months, check if we have actual transaction data
+    if (supabaseTransactions?.length > 0) {
+      return supabaseTransactions.some((transaction) => {
+        const transactionDate = new Date(transaction.date);
+        return (
+          transactionDate.getMonth() === selectedMonth &&
+          transactionDate.getFullYear() === selectedYear
+        );
+      });
+    }
+
+    // For localStorage data, check if we have expenses or transactions
+    if (currentUser === "combined") {
+      const hasExpenses = [
+        ...profiles.murali.expenses,
+        ...profiles.valar.expenses,
+      ].some((expense) => {
+        const expenseDate = new Date(expense.date);
+        return (
+          expenseDate.getMonth() === selectedMonth &&
+          expenseDate.getFullYear() === selectedYear
+        );
+      });
+      const hasRefunds = [
+        ...profiles.murali.refunds,
+        ...profiles.valar.refunds,
+      ].some((refund) => {
+        const refundDate = new Date(refund.date);
+        return (
+          refundDate.getMonth() === selectedMonth &&
+          refundDate.getFullYear() === selectedYear
+        );
+      });
+      return hasExpenses || hasRefunds;
+    } else {
+      const hasExpenses = currentProfile.expenses.some((expense) => {
+        const expenseDate = new Date(expense.date);
+        return (
+          expenseDate.getMonth() === selectedMonth &&
+          expenseDate.getFullYear() === selectedYear
+        );
+      });
+      const hasRefunds = currentProfile.refunds.some((refund) => {
+        const refundDate = new Date(refund.date);
+        return (
+          refundDate.getMonth() === selectedMonth &&
+          refundDate.getFullYear() === selectedYear
+        );
+      });
+      return hasExpenses || hasRefunds;
+    }
+  };
+
   const getAllocatedAmounts = () => {
+    const hasData = hasDataForSelectedMonth();
+
+    // If no data for this month/year, return zeros
+    if (!hasData) {
+      return {
+        need: 0,
+        want: 0,
+        savings: 0,
+        investments: 0,
+        hasData: false,
+      };
+    }
+
+    let result;
     if (currentUser === "combined") {
       // Calculate combined allocations
       const muraliBudget = Math.round(
@@ -379,30 +456,34 @@ const BudgetDashboard = () => {
         ),
       };
 
-      return {
+      result = {
         need: muraliAllocations.need + valarAllocations.need,
         want: muraliAllocations.want + valarAllocations.want,
         savings: muraliAllocations.savings + valarAllocations.savings,
         investments:
           muraliAllocations.investments + valarAllocations.investments,
       };
+    } else {
+      result = {
+        need: Math.round(
+          (calculatedTotalBudget * currentProfile.budgetAllocation.need) / 100,
+        ),
+        want: Math.round(
+          (calculatedTotalBudget * currentProfile.budgetAllocation.want) / 100,
+        ),
+        savings: Math.round(
+          (calculatedTotalBudget * currentProfile.budgetAllocation.savings) /
+            100,
+        ),
+        investments: Math.round(
+          (calculatedTotalBudget *
+            currentProfile.budgetAllocation.investments) /
+            100,
+        ),
+      };
     }
 
-    return {
-      need: Math.round(
-        (calculatedTotalBudget * currentProfile.budgetAllocation.need) / 100,
-      ),
-      want: Math.round(
-        (calculatedTotalBudget * currentProfile.budgetAllocation.want) / 100,
-      ),
-      savings: Math.round(
-        (calculatedTotalBudget * currentProfile.budgetAllocation.savings) / 100,
-      ),
-      investments: Math.round(
-        (calculatedTotalBudget * currentProfile.budgetAllocation.investments) /
-          100,
-      ),
-    };
+    return { ...result, hasData: true };
   };
 
   const allocatedAmounts = getAllocatedAmounts();
