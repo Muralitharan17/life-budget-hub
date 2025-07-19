@@ -2383,7 +2383,8 @@ const BudgetDashboard = () => {
                     <h3 className="text-lg font-semibold">{portfolio.name}</h3>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                       <span>
-                        Allocated: ₹{portfolio.allocatedAmount.toLocaleString()}
+                        Allocated: ��
+                        {portfolio.allocatedAmount.toLocaleString()}
                       </span>
                       <span>•</span>
                       <span className="text-primary">
@@ -2933,10 +2934,20 @@ const BudgetDashboard = () => {
                   </option>
                 ))}
               </select>
-              <Button variant="outline" size="sm">
-                <Calendar className="h-4 w-4 mr-2" />
-                {new Date().getFullYear()}
-              </Button>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                {Array.from(
+                  { length: 10 },
+                  (_, i) => new Date().getFullYear() - 5 + i,
+                ).map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
