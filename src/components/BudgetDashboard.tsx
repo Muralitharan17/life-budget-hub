@@ -3343,7 +3343,7 @@ const BudgetDashboard = () => {
             </div>
           </TabsContent>
 
-                              <TabsContent value="transactions">
+          <TabsContent value="transactions">
             <div className="space-y-6">
               {/* Bank Balance Section - Only for Individual Users */}
               {currentUser !== "combined" && (
@@ -3354,7 +3354,8 @@ const BudgetDashboard = () => {
                       Bank Balance Tracker
                     </CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      Track your bank balance and see how your expenses affect it throughout the month
+                      Track your bank balance and see how your expenses affect
+                      it throughout the month
                     </p>
                   </CardHeader>
                   <CardContent>
@@ -3378,364 +3379,370 @@ const BudgetDashboard = () => {
                       : currentProfile.name}
                   </p>
                 </CardHeader>
-              <CardContent>
-                {(() => {
-                  // Get all transactions
-                  let allTransactions = [];
+                <CardContent>
+                  {(() => {
+                    // Get all transactions
+                    let allTransactions = [];
 
-                  if (currentUser === "combined") {
-                    // Combine transactions from both users
-                    const muraliExpenses = profiles.murali.expenses
-                      .filter((expense) => {
-                        const expenseDate = new Date(expense.date);
-                        return (
-                          expenseDate.getMonth() === selectedMonth &&
-                          expenseDate.getFullYear() === selectedYear
-                        );
-                      })
-                      .map((expense) => ({
-                        ...expense,
-                        type: "expense",
-                        user: "Murali",
-                      }));
-                    const valarExpenses = profiles.valar.expenses
-                      .filter((expense) => {
-                        const expenseDate = new Date(expense.date);
-                        return (
-                          expenseDate.getMonth() === selectedMonth &&
-                          expenseDate.getFullYear() === selectedYear
-                        );
-                      })
-                      .map((expense) => ({
-                        ...expense,
-                        type: "expense",
-                        user: "Valar",
-                      }));
-                    const muraliRefunds = profiles.murali.refunds
-                      .filter((refund) => {
-                        const refundDate = new Date(refund.date);
-                        return (
-                          refundDate.getMonth() === selectedMonth &&
-                          refundDate.getFullYear() === selectedYear
-                        );
-                      })
-                      .map((refund) => ({
-                        ...refund,
-                        type: "refund",
-                        user: "Murali",
-                      }));
-                    const valarRefunds = profiles.valar.refunds
-                      .filter((refund) => {
-                        const refundDate = new Date(refund.date);
-                        return (
-                          refundDate.getMonth() === selectedMonth &&
-                          refundDate.getFullYear() === selectedYear
-                        );
-                      })
-                      .map((refund) => ({
-                        ...refund,
-                        type: "refund",
-                        user: "Valar",
-                      }));
-                    const muraliInvestments = profiles.murali.investmentEntries
-                      .filter((investment) => {
-                        const investmentDate = new Date(investment.date);
-                        return (
-                          investmentDate.getMonth() === selectedMonth &&
-                          investmentDate.getFullYear() === selectedYear
-                        );
-                      })
-                      .map((investment) => ({
-                        ...investment,
-                        type: "investment",
-                        user: "Murali",
-                        category: "investments",
-                      }));
-                    const valarInvestments = profiles.valar.investmentEntries
-                      .filter((investment) => {
-                        const investmentDate = new Date(investment.date);
-                        return (
-                          investmentDate.getMonth() === selectedMonth &&
-                          investmentDate.getFullYear() === selectedYear
-                        );
-                      })
-                      .map((investment) => ({
-                        ...investment,
-                        type: "investment",
-                        user: "Valar",
-                        category: "investments",
-                      }));
+                    if (currentUser === "combined") {
+                      // Combine transactions from both users
+                      const muraliExpenses = profiles.murali.expenses
+                        .filter((expense) => {
+                          const expenseDate = new Date(expense.date);
+                          return (
+                            expenseDate.getMonth() === selectedMonth &&
+                            expenseDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((expense) => ({
+                          ...expense,
+                          type: "expense",
+                          user: "Murali",
+                        }));
+                      const valarExpenses = profiles.valar.expenses
+                        .filter((expense) => {
+                          const expenseDate = new Date(expense.date);
+                          return (
+                            expenseDate.getMonth() === selectedMonth &&
+                            expenseDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((expense) => ({
+                          ...expense,
+                          type: "expense",
+                          user: "Valar",
+                        }));
+                      const muraliRefunds = profiles.murali.refunds
+                        .filter((refund) => {
+                          const refundDate = new Date(refund.date);
+                          return (
+                            refundDate.getMonth() === selectedMonth &&
+                            refundDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((refund) => ({
+                          ...refund,
+                          type: "refund",
+                          user: "Murali",
+                        }));
+                      const valarRefunds = profiles.valar.refunds
+                        .filter((refund) => {
+                          const refundDate = new Date(refund.date);
+                          return (
+                            refundDate.getMonth() === selectedMonth &&
+                            refundDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((refund) => ({
+                          ...refund,
+                          type: "refund",
+                          user: "Valar",
+                        }));
+                      const muraliInvestments =
+                        profiles.murali.investmentEntries
+                          .filter((investment) => {
+                            const investmentDate = new Date(investment.date);
+                            return (
+                              investmentDate.getMonth() === selectedMonth &&
+                              investmentDate.getFullYear() === selectedYear
+                            );
+                          })
+                          .map((investment) => ({
+                            ...investment,
+                            type: "investment",
+                            user: "Murali",
+                            category: "investments",
+                          }));
+                      const valarInvestments = profiles.valar.investmentEntries
+                        .filter((investment) => {
+                          const investmentDate = new Date(investment.date);
+                          return (
+                            investmentDate.getMonth() === selectedMonth &&
+                            investmentDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((investment) => ({
+                          ...investment,
+                          type: "investment",
+                          user: "Valar",
+                          category: "investments",
+                        }));
 
-                    allTransactions = [
-                      ...muraliExpenses,
-                      ...valarExpenses,
-                      ...muraliRefunds,
-                      ...valarRefunds,
-                      ...muraliInvestments,
-                      ...valarInvestments,
-                    ];
-                  } else {
-                    // Single user transactions
-                    const expenses = currentProfile.expenses
-                      .filter((expense) => {
-                        const expenseDate = new Date(expense.date);
-                        return (
-                          expenseDate.getMonth() === selectedMonth &&
-                          expenseDate.getFullYear() === selectedYear
-                        );
-                      })
-                      .map((expense) => ({
-                        ...expense,
-                        type: "expense",
-                        user: currentProfile.name,
-                      }));
-                    const refunds = currentProfile.refunds
-                      .filter((refund) => {
-                        const refundDate = new Date(refund.date);
-                        return (
-                          refundDate.getMonth() === selectedMonth &&
-                          refundDate.getFullYear() === selectedYear
-                        );
-                      })
-                      .map((refund) => ({
-                        ...refund,
-                        type: "refund",
-                        user: currentProfile.name,
-                      }));
-                    const investments = currentProfile.investmentEntries
-                      .filter((investment) => {
-                        const investmentDate = new Date(investment.date);
-                        return (
-                          investmentDate.getMonth() === selectedMonth &&
-                          investmentDate.getFullYear() === selectedYear
-                        );
-                      })
-                      .map((investment) => ({
-                        ...investment,
-                        type: "investment",
-                        user: currentProfile.name,
-                        category: "investments",
-                      }));
+                      allTransactions = [
+                        ...muraliExpenses,
+                        ...valarExpenses,
+                        ...muraliRefunds,
+                        ...valarRefunds,
+                        ...muraliInvestments,
+                        ...valarInvestments,
+                      ];
+                    } else {
+                      // Single user transactions
+                      const expenses = currentProfile.expenses
+                        .filter((expense) => {
+                          const expenseDate = new Date(expense.date);
+                          return (
+                            expenseDate.getMonth() === selectedMonth &&
+                            expenseDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((expense) => ({
+                          ...expense,
+                          type: "expense",
+                          user: currentProfile.name,
+                        }));
+                      const refunds = currentProfile.refunds
+                        .filter((refund) => {
+                          const refundDate = new Date(refund.date);
+                          return (
+                            refundDate.getMonth() === selectedMonth &&
+                            refundDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((refund) => ({
+                          ...refund,
+                          type: "refund",
+                          user: currentProfile.name,
+                        }));
+                      const investments = currentProfile.investmentEntries
+                        .filter((investment) => {
+                          const investmentDate = new Date(investment.date);
+                          return (
+                            investmentDate.getMonth() === selectedMonth &&
+                            investmentDate.getFullYear() === selectedYear
+                          );
+                        })
+                        .map((investment) => ({
+                          ...investment,
+                          type: "investment",
+                          user: currentProfile.name,
+                          category: "investments",
+                        }));
 
-                    allTransactions = [...expenses, ...refunds, ...investments];
-                  }
+                      allTransactions = [
+                        ...expenses,
+                        ...refunds,
+                        ...investments,
+                      ];
+                    }
 
-                  // Sort by date (newest first)
-                  allTransactions.sort(
-                    (a, b) =>
-                      new Date(b.date).getTime() - new Date(a.date).getTime(),
-                  );
+                    // Sort by date (newest first)
+                    allTransactions.sort(
+                      (a, b) =>
+                        new Date(b.date).getTime() - new Date(a.date).getTime(),
+                    );
 
-                  return allTransactions.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Wallet className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>
-                        No transactions found for {monthNames[selectedMonth]}{" "}
-                        {selectedYear}
-                      </p>
-                      <p className="text-sm">
-                        Add some expenses, refunds, or investments to see them
-                        here
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {/* Summary Cards */}
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <Card className="bg-destructive/10 border-destructive/20">
-                          <CardContent className="pt-4">
-                            <div className="flex items-center justify-between">
-                              <Home className="h-5 w-5 text-destructive" />
-                              <div className="text-right">
-                                <p className="text-sm text-muted-foreground">
-                                  Need Expenses
-                                </p>
-                                <p className="text-lg font-bold text-destructive">
-                                  ₹
-                                  {allTransactions
-                                    .filter(
-                                      (t) =>
-                                        t.type === "expense" &&
-                                        t.category === "need",
-                                    )
-                                    .reduce((sum, t) => sum + t.amount, 0)
-                                    .toLocaleString()}
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card className="bg-warning/10 border-warning/20">
-                          <CardContent className="pt-4">
-                            <div className="flex items-center justify-between">
-                              <Music className="h-5 w-5 text-warning" />
-                              <div className="text-right">
-                                <p className="text-sm text-muted-foreground">
-                                  Want Expenses
-                                </p>
-                                <p className="text-lg font-bold text-warning">
-                                  ₹
-                                  {allTransactions
-                                    .filter(
-                                      (t) =>
-                                        t.type === "expense" &&
-                                        t.category === "want",
-                                    )
-                                    .reduce((sum, t) => sum + t.amount, 0)
-                                    .toLocaleString()}
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card className="bg-success/10 border-success/20">
-                          <CardContent className="pt-4">
-                            <div className="flex items-center justify-between">
-                              <PiggyBank className="h-5 w-5 text-success" />
-                              <div className="text-right">
-                                <p className="text-sm text-muted-foreground">
-                                  Savings
-                                </p>
-                                <p className="text-lg font-bold text-success">
-                                  ₹
-                                  {allTransactions
-                                    .filter(
-                                      (t) =>
-                                        t.type === "expense" &&
-                                        t.category === "savings",
-                                    )
-                                    .reduce((sum, t) => sum + t.amount, 0)
-                                    .toLocaleString()}
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card className="bg-primary/10 border-primary/20">
-                          <CardContent className="pt-4">
-                            <div className="flex items-center justify-between">
-                              <TrendingUp className="h-5 w-5 text-primary" />
-                              <div className="text-right">
-                                <p className="text-sm text-muted-foreground">
-                                  Investments
-                                </p>
-                                <p className="text-lg font-bold text-primary">
-                                  ₹
-                                  {allTransactions
-                                    .filter(
-                                      (t) =>
-                                        t.type === "investment" ||
-                                        (t.type === "expense" &&
-                                          t.category === "investments"),
-                                    )
-                                    .reduce((sum, t) => sum + t.amount, 0)
-                                    .toLocaleString()}
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
+                    return allTransactions.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Wallet className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>
+                          No transactions found for {monthNames[selectedMonth]}{" "}
+                          {selectedYear}
+                        </p>
+                        <p className="text-sm">
+                          Add some expenses, refunds, or investments to see them
+                          here
+                        </p>
                       </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {/* Summary Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                          <Card className="bg-destructive/10 border-destructive/20">
+                            <CardContent className="pt-4">
+                              <div className="flex items-center justify-between">
+                                <Home className="h-5 w-5 text-destructive" />
+                                <div className="text-right">
+                                  <p className="text-sm text-muted-foreground">
+                                    Need Expenses
+                                  </p>
+                                  <p className="text-lg font-bold text-destructive">
+                                    ₹
+                                    {allTransactions
+                                      .filter(
+                                        (t) =>
+                                          t.type === "expense" &&
+                                          t.category === "need",
+                                      )
+                                      .reduce((sum, t) => sum + t.amount, 0)
+                                      .toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          <Card className="bg-warning/10 border-warning/20">
+                            <CardContent className="pt-4">
+                              <div className="flex items-center justify-between">
+                                <Music className="h-5 w-5 text-warning" />
+                                <div className="text-right">
+                                  <p className="text-sm text-muted-foreground">
+                                    Want Expenses
+                                  </p>
+                                  <p className="text-lg font-bold text-warning">
+                                    ₹
+                                    {allTransactions
+                                      .filter(
+                                        (t) =>
+                                          t.type === "expense" &&
+                                          t.category === "want",
+                                      )
+                                      .reduce((sum, t) => sum + t.amount, 0)
+                                      .toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          <Card className="bg-success/10 border-success/20">
+                            <CardContent className="pt-4">
+                              <div className="flex items-center justify-between">
+                                <PiggyBank className="h-5 w-5 text-success" />
+                                <div className="text-right">
+                                  <p className="text-sm text-muted-foreground">
+                                    Savings
+                                  </p>
+                                  <p className="text-lg font-bold text-success">
+                                    ₹
+                                    {allTransactions
+                                      .filter(
+                                        (t) =>
+                                          t.type === "expense" &&
+                                          t.category === "savings",
+                                      )
+                                      .reduce((sum, t) => sum + t.amount, 0)
+                                      .toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                          <Card className="bg-primary/10 border-primary/20">
+                            <CardContent className="pt-4">
+                              <div className="flex items-center justify-between">
+                                <TrendingUp className="h-5 w-5 text-primary" />
+                                <div className="text-right">
+                                  <p className="text-sm text-muted-foreground">
+                                    Investments
+                                  </p>
+                                  <p className="text-lg font-bold text-primary">
+                                    ₹
+                                    {allTransactions
+                                      .filter(
+                                        (t) =>
+                                          t.type === "investment" ||
+                                          (t.type === "expense" &&
+                                            t.category === "investments"),
+                                      )
+                                      .reduce((sum, t) => sum + t.amount, 0)
+                                      .toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
 
-                      {/* Transactions Table */}
-                      <div className="rounded-md border">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Type</TableHead>
-                              <TableHead>Description</TableHead>
-                              <TableHead>Category</TableHead>
-                              <TableHead>Tag</TableHead>
-                              {currentUser === "combined" && (
-                                <TableHead>User</TableHead>
-                              )}
-                              <TableHead className="text-right">
-                                Amount
-                              </TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {allTransactions.map((transaction, index) => (
-                              <TableRow
-                                key={`${transaction.type}-${transaction.id || index}`}
-                              >
-                                <TableCell className="font-medium">
-                                  {new Date(
-                                    transaction.date,
-                                  ).toLocaleDateString("en-IN")}
-                                </TableCell>
-                                <TableCell>
-                                  <Badge
-                                    variant={
-                                      transaction.type === "expense"
-                                        ? "destructive"
-                                        : transaction.type === "refund"
-                                          ? "default"
-                                          : "secondary"
-                                    }
-                                  >
-                                    {transaction.type === "expense"
-                                      ? "Expense"
-                                      : transaction.type === "refund"
-                                        ? "Refund"
-                                        : "Investment"}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell>
-                                  {transaction.type === "investment"
-                                    ? transaction.notes || "Investment Entry"
-                                    : transaction.spentFor ||
-                                      transaction.refundFor ||
-                                      "N/A"}
-                                </TableCell>
-                                <TableCell>
-                                  <Badge
-                                    className={getTagColor(
-                                      transaction.category || "investments",
-                                    )}
-                                    variant="outline"
-                                  >
-                                    {transaction.category || "investments"}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell>
-                                  {transaction.tag && (
-                                    <Badge
-                                      className={getTagColor(transaction.tag)}
-                                      variant="outline"
-                                    >
-                                      {transaction.tag}
-                                    </Badge>
-                                  )}
-                                </TableCell>
+                        {/* Transactions Table */}
+                        <div className="rounded-md border">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Type</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead>Category</TableHead>
+                                <TableHead>Tag</TableHead>
                                 {currentUser === "combined" && (
+                                  <TableHead>User</TableHead>
+                                )}
+                                <TableHead className="text-right">
+                                  Amount
+                                </TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {allTransactions.map((transaction, index) => (
+                                <TableRow
+                                  key={`${transaction.type}-${transaction.id || index}`}
+                                >
+                                  <TableCell className="font-medium">
+                                    {new Date(
+                                      transaction.date,
+                                    ).toLocaleDateString("en-IN")}
+                                  </TableCell>
                                   <TableCell>
-                                    <Badge variant="outline">
-                                      {transaction.user}
+                                    <Badge
+                                      variant={
+                                        transaction.type === "expense"
+                                          ? "destructive"
+                                          : transaction.type === "refund"
+                                            ? "default"
+                                            : "secondary"
+                                      }
+                                    >
+                                      {transaction.type === "expense"
+                                        ? "Expense"
+                                        : transaction.type === "refund"
+                                          ? "Refund"
+                                          : "Investment"}
                                     </Badge>
                                   </TableCell>
-                                )}
-                                <TableCell
-                                  className={`text-right font-semibold ${
-                                    transaction.type === "refund"
-                                      ? "text-success"
-                                      : "text-foreground"
-                                  }`}
-                                >
-                                  {transaction.type === "refund" ? "+" : "-"}₹
-                                  {transaction.amount.toLocaleString()}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
+                                  <TableCell>
+                                    {transaction.type === "investment"
+                                      ? transaction.notes || "Investment Entry"
+                                      : transaction.spentFor ||
+                                        transaction.refundFor ||
+                                        "N/A"}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge
+                                      className={getTagColor(
+                                        transaction.category || "investments",
+                                      )}
+                                      variant="outline"
+                                    >
+                                      {transaction.category || "investments"}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    {transaction.tag && (
+                                      <Badge
+                                        className={getTagColor(transaction.tag)}
+                                        variant="outline"
+                                      >
+                                        {transaction.tag}
+                                      </Badge>
+                                    )}
+                                  </TableCell>
+                                  {currentUser === "combined" && (
+                                    <TableCell>
+                                      <Badge variant="outline">
+                                        {transaction.user}
+                                      </Badge>
+                                    </TableCell>
+                                  )}
+                                  <TableCell
+                                    className={`text-right font-semibold ${
+                                      transaction.type === "refund"
+                                        ? "text-success"
+                                        : "text-foreground"
+                                    }`}
+                                  >
+                                    {transaction.type === "refund" ? "+" : "-"}₹
+                                    {transaction.amount.toLocaleString()}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })()}
-              </CardContent>
-            </Card>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="config">
