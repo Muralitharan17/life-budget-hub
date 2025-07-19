@@ -3343,21 +3343,41 @@ const BudgetDashboard = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="transactions">
-            <Card className="shadow-card">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-primary">
-                  <Wallet className="h-6 w-6" />
-                  Transaction Statement
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  All transactions for {monthNames[selectedMonth]}{" "}
-                  {selectedYear} -{" "}
-                  {currentUser === "combined"
-                    ? "Combined View"
-                    : currentProfile.name}
-                </p>
-              </CardHeader>
+                    <TabsContent value="transactions">
+            <div className="space-y-6">
+              {/* Bank Balance Section - Only for Individual Users */}
+              {currentUser !== "combined" && (
+                <Card className="shadow-card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-primary">
+                      <CreditCard className="h-6 w-6" />
+                      Bank Balance Tracker
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Track your bank balance and see how your expenses affect it throughout the month
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <BankBalanceTracker />
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Transactions Statement */}
+              <Card className="shadow-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-primary">
+                    <CreditCard className="h-6 w-6" />
+                    Transaction Statement
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    All transactions for {monthNames[selectedMonth]}{" "}
+                    {selectedYear} -{" "}
+                    {currentUser === "combined"
+                      ? "Combined View"
+                      : currentProfile.name}
+                  </p>
+                </CardHeader>
               <CardContent>
                 {(() => {
                   // Get all transactions
