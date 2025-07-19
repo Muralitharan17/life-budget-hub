@@ -393,7 +393,7 @@ const InvestmentConfig = ({
     onInvestmentPlanUpdate(investmentPlan);
 
     toast({
-      title: "Investment Plan Saved",
+      title: "Investment Plan Configuration Saved",
       description: `Investment plan configured with ${investmentPlan.portfolios.length} portfolios`,
     });
   };
@@ -747,72 +747,76 @@ const InvestmentConfig = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Investment Plan Summary */}
-      <Card className="shadow-card bg-gradient-to-r from-primary/5 to-success/5 border-primary/20">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-primary">
-            <Target className="h-6 w-6" />
-            Investment Plan Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="text-center p-4 bg-background/50 rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                Total Investment Budget
-              </p>
-              <p className="text-2xl font-bold text-primary">
-                ₹{totalInvestmentAmount.toLocaleString()}
-              </p>
-            </div>
-            <div className="text-center p-4 bg-background/50 rounded-lg">
-              <p className="text-sm text-muted-foreground">Total Allocated</p>
-              <p className="text-2xl font-bold text-secondary">
-                ₹{getTotalAllocatedAmount().toLocaleString()}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {getTotalAllocatedPercentage().toFixed(1)}%
-              </p>
-            </div>
-            <div className="text-center p-4 bg-background/50 rounded-lg">
-              <p className="text-sm text-muted-foreground">Remaining</p>
-              <p
-                className={`text-2xl font-bold ${
-                  totalInvestmentAmount - getTotalAllocatedAmount() >= 0
-                    ? "text-success"
-                    : "text-destructive"
-                }`}
-              >
-                ₹
-                {(
-                  totalInvestmentAmount - getTotalAllocatedAmount()
-                ).toLocaleString()}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {totalInvestmentAmount > 0
-                  ? (100 - getTotalAllocatedPercentage()).toFixed(1)
-                  : 0}
-                %
-              </p>
-            </div>
+    <Card className="shadow-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-primary">
+          <Target className="h-6 w-6" />
+          Investment Plan Configuration
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Configure your investment portfolios and track allocation
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-8">
+        {/* Investment Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gradient-to-r from-primary/5 to-success/5 rounded-lg border border-primary/20">
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              Total Investment Budget
+            </p>
+            <p className="text-2xl font-bold text-primary">
+              ₹{totalInvestmentAmount.toLocaleString()}
+            </p>
           </div>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Total Allocated</p>
+            <p className="text-2xl font-bold text-secondary">
+              ₹{getTotalAllocatedAmount().toLocaleString()}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {getTotalAllocatedPercentage().toFixed(1)}%
+            </p>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Remaining</p>
+            <p
+              className={`text-2xl font-bold ${
+                totalInvestmentAmount - getTotalAllocatedAmount() >= 0
+                  ? "text-success"
+                  : "text-destructive"
+              }`}
+            >
+              ₹
+              {(
+                totalInvestmentAmount - getTotalAllocatedAmount()
+              ).toLocaleString()}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {totalInvestmentAmount > 0
+                ? (100 - getTotalAllocatedPercentage()).toFixed(1)
+                : 0}
+              %
+            </p>
+          </div>
+        </div>
 
-          {!isAllocationValid() && (
-            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-sm">
-              ⚠️ Total allocated amount must equal the investment budget amount
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        {!isAllocationValid() && (
+          <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-sm">
+            ⚠️ Total allocated amount must equal the investment budget amount
+          </div>
+        )}
 
-      {/* Portfolio Management */}
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Calculator className="h-5 w-5 text-primary" />
-              Investment Portfolios
+        {/* Portfolio Management */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Calculator className="h-5 w-5 text-primary" />
+                Investment Portfolios
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Manage your investment portfolios and their allocations
+              </p>
             </div>
             <PortfolioDialog
               onSave={(
@@ -829,9 +833,8 @@ const InvestmentConfig = ({
                 )
               }
             />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+          </div>
+
           {investmentPlan.portfolios.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -839,330 +842,341 @@ const InvestmentConfig = ({
               <p className="text-sm">Add your first portfolio to get started</p>
             </div>
           ) : (
-            investmentPlan.portfolios.map((portfolio) => (
-              <Card key={portfolio.id} className="border-l-4 border-l-primary">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold">
-                        {portfolio.name}
-                      </h3>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>
-                          {portfolio.allocationType === "percentage"
-                            ? `${portfolio.allocationValue}%`
-                            : `₹${portfolio.allocationValue.toLocaleString()}`}
-                        </span>
-                        <span>•</span>
-                        <span>
-                          ₹{portfolio.allocatedAmount.toLocaleString()}
-                        </span>
-                        {portfolio.allowDirectInvestment && (
-                          <>
-                            <span>•</span>
-                            <Badge variant="secondary" className="text-xs">
-                              Direct Investment
-                            </Badge>
-                          </>
-                        )}
+            <div className="space-y-6">
+              {investmentPlan.portfolios.map((portfolio) => (
+                <Card
+                  key={portfolio.id}
+                  className="border-l-4 border-l-primary"
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-lg font-semibold">
+                          {portfolio.name}
+                        </h4>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>
+                            {portfolio.allocationType === "percentage"
+                              ? `${portfolio.allocationValue}%`
+                              : `₹${portfolio.allocationValue.toLocaleString()}`}
+                          </span>
+                          <span>•</span>
+                          <span>
+                            ₹{portfolio.allocatedAmount.toLocaleString()}
+                          </span>
+                          {portfolio.allowDirectInvestment && (
+                            <>
+                              <span>•</span>
+                              <Badge variant="secondary" className="text-xs">
+                                Direct Investment
+                              </Badge>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <PortfolioDialog
-                        portfolio={portfolio}
-                        onSave={(
-                          name,
-                          allocationType,
-                          allocationValue,
-                          allowDirectInvestment,
-                        ) =>
-                          updatePortfolio(
-                            portfolio.id,
+                      <div className="flex items-center space-x-2">
+                        <PortfolioDialog
+                          portfolio={portfolio}
+                          onSave={(
                             name,
                             allocationType,
                             allocationValue,
                             allowDirectInvestment,
-                          )
-                        }
-                      />
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Delete Portfolio
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete "{portfolio.name}
-                              "? This will also delete all categories and funds
-                              within this portfolio.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => deletePortfolio(portfolio.id)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {!portfolio.allowDirectInvestment && (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium">Categories</h4>
-                        <CategoryDialog
-                          portfolioId={portfolio.id}
-                          onSave={(name, allocationType, allocationValue) =>
-                            addCategory(
+                          ) =>
+                            updatePortfolio(
                               portfolio.id,
                               name,
                               allocationType,
                               allocationValue,
+                              allowDirectInvestment,
                             )
                           }
                         />
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Delete Portfolio
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "
+                                {portfolio.name}
+                                "? This will also delete all categories and
+                                funds within this portfolio.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deletePortfolio(portfolio.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
-
-                      {portfolio.categories.length === 0 ? (
-                        <div className="text-center py-4 text-muted-foreground text-sm">
-                          No categories added yet
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {!portfolio.allowDirectInvestment && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <h5 className="font-medium">Categories</h5>
+                          <CategoryDialog
+                            portfolioId={portfolio.id}
+                            onSave={(name, allocationType, allocationValue) =>
+                              addCategory(
+                                portfolio.id,
+                                name,
+                                allocationType,
+                                allocationValue,
+                              )
+                            }
+                          />
                         </div>
-                      ) : (
-                        <div className="space-y-4">
-                          {portfolio.categories.map((category) => (
-                            <Card
-                              key={category.id}
-                              className="border-l-4 border-l-secondary"
-                            >
-                              <CardHeader className="pb-3">
-                                <CardTitle className="flex items-center justify-between text-base">
-                                  <div>
-                                    <h5 className="font-medium">
-                                      {category.name}
-                                    </h5>
-                                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                      <span>
-                                        {category.allocationType ===
-                                        "percentage"
-                                          ? `${category.allocationValue}%`
-                                          : `₹${category.allocationValue.toLocaleString()}`}
-                                      </span>
-                                      <span>•</span>
-                                      <span>
-                                        ₹
-                                        {category.allocatedAmount.toLocaleString()}
-                                      </span>
+
+                        {portfolio.categories.length === 0 ? (
+                          <div className="text-center py-4 text-muted-foreground text-sm">
+                            No categories added yet
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {portfolio.categories.map((category) => (
+                              <Card
+                                key={category.id}
+                                className="border-l-4 border-l-secondary"
+                              >
+                                <CardHeader className="pb-3">
+                                  <CardTitle className="flex items-center justify-between text-base">
+                                    <div>
+                                      <h6 className="font-medium">
+                                        {category.name}
+                                      </h6>
+                                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                        <span>
+                                          {category.allocationType ===
+                                          "percentage"
+                                            ? `${category.allocationValue}%`
+                                            : `₹${category.allocationValue.toLocaleString()}`}
+                                        </span>
+                                        <span>•</span>
+                                        <span>
+                                          ₹
+                                          {category.allocatedAmount.toLocaleString()}
+                                        </span>
+                                      </div>
                                     </div>
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <CategoryDialog
-                                      portfolioId={portfolio.id}
-                                      category={category}
-                                      onSave={(
-                                        name,
-                                        allocationType,
-                                        allocationValue,
-                                      ) =>
-                                        updateCategory(
-                                          portfolio.id,
-                                          category.id,
+                                    <div className="flex items-center space-x-2">
+                                      <CategoryDialog
+                                        portfolioId={portfolio.id}
+                                        category={category}
+                                        onSave={(
                                           name,
                                           allocationType,
                                           allocationValue,
-                                        )
+                                        ) =>
+                                          updateCategory(
+                                            portfolio.id,
+                                            category.id,
+                                            name,
+                                            allocationType,
+                                            allocationValue,
+                                          )
+                                        }
+                                      />
+                                      <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                          <Button variant="ghost" size="sm">
+                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                          </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                          <AlertDialogHeader>
+                                            <AlertDialogTitle>
+                                              Delete Category
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                              Are you sure you want to delete "
+                                              {category.name}"? This will also
+                                              delete all funds within this
+                                              category.
+                                            </AlertDialogDescription>
+                                          </AlertDialogHeader>
+                                          <AlertDialogFooter>
+                                            <AlertDialogCancel>
+                                              Cancel
+                                            </AlertDialogCancel>
+                                            <AlertDialogAction
+                                              onClick={() =>
+                                                deleteCategory(
+                                                  portfolio.id,
+                                                  category.id,
+                                                )
+                                              }
+                                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                            >
+                                              Delete
+                                            </AlertDialogAction>
+                                          </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                      </AlertDialog>
+                                    </div>
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="flex items-center justify-between mb-3">
+                                    <h6 className="text-sm font-medium">
+                                      Funds
+                                    </h6>
+                                    <FundDialog
+                                      portfolioId={portfolio.id}
+                                      categoryId={category.id}
+                                      onSave={(name) =>
+                                        addFund(portfolio.id, category.id, name)
                                       }
                                     />
-                                    <AlertDialog>
-                                      <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="sm">
-                                          <Trash2 className="h-4 w-4 text-destructive" />
-                                        </Button>
-                                      </AlertDialogTrigger>
-                                      <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                          <AlertDialogTitle>
-                                            Delete Category
-                                          </AlertDialogTitle>
-                                          <AlertDialogDescription>
-                                            Are you sure you want to delete "
-                                            {category.name}"? This will also
-                                            delete all funds within this
-                                            category.
-                                          </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                          <AlertDialogCancel>
-                                            Cancel
-                                          </AlertDialogCancel>
-                                          <AlertDialogAction
-                                            onClick={() =>
-                                              deleteCategory(
-                                                portfolio.id,
-                                                category.id,
-                                              )
-                                            }
-                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                          >
-                                            Delete
-                                          </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                      </AlertDialogContent>
-                                    </AlertDialog>
                                   </div>
-                                </CardTitle>
-                              </CardHeader>
-                              <CardContent>
-                                <div className="flex items-center justify-between mb-3">
-                                  <h6 className="text-sm font-medium">Funds</h6>
-                                  <FundDialog
-                                    portfolioId={portfolio.id}
-                                    categoryId={category.id}
-                                    onSave={(name) =>
-                                      addFund(portfolio.id, category.id, name)
-                                    }
-                                  />
-                                </div>
 
-                                {category.funds.length === 0 ? (
-                                  <div className="text-center py-3 text-muted-foreground text-sm">
-                                    No funds added yet
-                                  </div>
-                                ) : (
-                                  <div className="space-y-2">
-                                    {category.funds.map((fund) => (
-                                      <div
-                                        key={fund.id}
-                                        className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
-                                      >
-                                        <div>
-                                          <p className="font-medium text-sm">
-                                            {fund.name}
-                                          </p>
-                                          <p className="text-xs text-muted-foreground">
-                                            ₹
-                                            {fund.allocatedAmount.toLocaleString()}
-                                            {category.funds.length > 0 &&
-                                              ` (${(
-                                                (fund.allocatedAmount /
-                                                  category.allocatedAmount) *
-                                                100
-                                              ).toFixed(1)}%)`}
-                                          </p>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                          <FundDialog
-                                            portfolioId={portfolio.id}
-                                            categoryId={category.id}
-                                            fund={fund}
-                                            onSave={(name) =>
-                                              updateFund(
-                                                portfolio.id,
-                                                category.id,
-                                                fund.id,
-                                                name,
-                                              )
-                                            }
-                                          />
-                                          <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                              <Button variant="ghost" size="sm">
-                                                <Trash2 className="h-4 w-4 text-destructive" />
-                                              </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                              <AlertDialogHeader>
-                                                <AlertDialogTitle>
-                                                  Delete Fund
-                                                </AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                  Are you sure you want to
-                                                  delete "{fund.name}"?
-                                                </AlertDialogDescription>
-                                              </AlertDialogHeader>
-                                              <AlertDialogFooter>
-                                                <AlertDialogCancel>
-                                                  Cancel
-                                                </AlertDialogCancel>
-                                                <AlertDialogAction
-                                                  onClick={() =>
-                                                    deleteFund(
-                                                      portfolio.id,
-                                                      category.id,
-                                                      fund.id,
-                                                    )
-                                                  }
-                                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  {category.funds.length === 0 ? (
+                                    <div className="text-center py-3 text-muted-foreground text-sm">
+                                      No funds added yet
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-2">
+                                      {category.funds.map((fund) => (
+                                        <div
+                                          key={fund.id}
+                                          className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+                                        >
+                                          <div>
+                                            <p className="font-medium text-sm">
+                                              {fund.name}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                              ₹
+                                              {fund.allocatedAmount.toLocaleString()}
+                                              {category.funds.length > 0 &&
+                                                ` (${(
+                                                  (fund.allocatedAmount /
+                                                    category.allocatedAmount) *
+                                                  100
+                                                ).toFixed(1)}%)`}
+                                            </p>
+                                          </div>
+                                          <div className="flex items-center space-x-2">
+                                            <FundDialog
+                                              portfolioId={portfolio.id}
+                                              categoryId={category.id}
+                                              fund={fund}
+                                              onSave={(name) =>
+                                                updateFund(
+                                                  portfolio.id,
+                                                  category.id,
+                                                  fund.id,
+                                                  name,
+                                                )
+                                              }
+                                            />
+                                            <AlertDialog>
+                                              <AlertDialogTrigger asChild>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
                                                 >
-                                                  Delete
-                                                </AlertDialogAction>
-                                              </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                          </AlertDialog>
+                                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                                </Button>
+                                              </AlertDialogTrigger>
+                                              <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                  <AlertDialogTitle>
+                                                    Delete Fund
+                                                  </AlertDialogTitle>
+                                                  <AlertDialogDescription>
+                                                    Are you sure you want to
+                                                    delete "{fund.name}"?
+                                                  </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                  <AlertDialogCancel>
+                                                    Cancel
+                                                  </AlertDialogCancel>
+                                                  <AlertDialogAction
+                                                    onClick={() =>
+                                                      deleteFund(
+                                                        portfolio.id,
+                                                        category.id,
+                                                        fund.id,
+                                                      )
+                                                    }
+                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                  >
+                                                    Delete
+                                                  </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                              </AlertDialogContent>
+                                            </AlertDialog>
+                                          </div>
                                         </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-                  {portfolio.allowDirectInvestment && (
-                    <div className="p-4 bg-primary/10 border border-primary/30 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium text-primary">
-                            Direct Investment Portfolio
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            This portfolio allows direct investments without
-                            categories or funds.
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-xs text-muted-foreground">
-                            Simple Tracking
-                          </span>
-                          <p className="text-sm font-bold text-primary">
-                            No subcategories needed
-                          </p>
+                                      ))}
+                                    </div>
+                                  )}
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {portfolio.allowDirectInvestment && (
+                      <div className="p-4 bg-primary/10 border border-primary/30 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h5 className="font-medium text-primary">
+                              Direct Investment Portfolio
+                            </h5>
+                            <p className="text-sm text-muted-foreground">
+                              This portfolio allows direct investments without
+                              categories or funds.
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs text-muted-foreground">
+                              Simple Tracking
+                            </span>
+                            <p className="text-sm font-bold text-primary">
+                              No subcategories needed
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Save Button */}
-      <Button
-        onClick={handleSaveConfiguration}
-        className="w-full"
-        variant="default"
-        size="lg"
-        disabled={!isAllocationValid()}
-      >
-        <Save className="h-4 w-4 mr-2" />
-        Save Investment Plan Configuration
-      </Button>
-    </div>
+        {/* Save Button */}
+        <Button
+          onClick={handleSaveConfiguration}
+          className="w-full"
+          variant="default"
+          size="lg"
+          disabled={!isAllocationValid()}
+        >
+          <Save className="h-4 w-4 mr-2" />
+          Save Investment Plan Configuration
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 
