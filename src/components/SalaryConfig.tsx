@@ -128,14 +128,6 @@ const SalaryConfig = ({
   const totalAllocationPercentage = getTotalAllocationPercentage();
   const isAllocationValid = totalAllocationPercentage === 100;
 
-  // Preset allocation templates
-  const allocationPresets = {
-    "50/30/20 Rule": { need: 50, want: 30, savings: 15, investments: 5 },
-    Conservative: { need: 60, want: 20, savings: 15, investments: 5 },
-    "Aggressive Saver": { need: 40, want: 20, savings: 25, investments: 15 },
-    "Investor Focus": { need: 45, want: 25, savings: 10, investments: 20 },
-  };
-
   return (
     <div className="space-y-6">
       {/* Salary Configuration */}
@@ -201,28 +193,6 @@ const SalaryConfig = ({
               Percentage of salary to allocate for monthly budget
             </p>
           </div>
-
-          {/* Quick Percentage Presets */}
-          <div className="space-y-2">
-            <Label>Quick Percentage Presets</Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {[50, 60, 70, 80].map((preset) => (
-                <Button
-                  key={preset}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setBudgetPercentage(preset)}
-                  className={
-                    budgetPercentage === preset
-                      ? "bg-primary text-primary-foreground"
-                      : ""
-                  }
-                >
-                  {preset}%
-                </Button>
-              ))}
-            </div>
-          </div>
         </CardContent>
       </Card>
 
@@ -238,24 +208,6 @@ const SalaryConfig = ({
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Allocation Presets */}
-          <div className="space-y-2">
-            <Label>Allocation Templates</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {Object.entries(allocationPresets).map(([name, preset]) => (
-                <Button
-                  key={name}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setBudgetAllocation(preset)}
-                  className="text-xs"
-                >
-                  {name}
-                </Button>
-              ))}
-            </div>
-          </div>
-
           {/* Individual Allocation Inputs */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Need */}
