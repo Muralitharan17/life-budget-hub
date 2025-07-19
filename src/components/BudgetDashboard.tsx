@@ -591,32 +591,42 @@ const BudgetDashboard = () => {
     totalInvestmentSpent;
   const totalRemaining = calculatedTotalBudget - totalSpent;
 
-  const handleSalaryUpdate = (
+  const handleSalaryUpdate = async (
     salary: number,
     percentage: number,
     allocation: BudgetAllocation,
   ) => {
-    setProfiles((prev) => ({
-      ...prev,
-      [currentUser]: {
-        ...prev[currentUser],
-        salary,
-        budgetPercentage: percentage,
-        budgetAllocation: allocation,
-      },
-    }));
-    localStorage.setItem(
-      "budgetProfiles",
-      JSON.stringify({
-        ...profiles,
-        [currentUser]: {
-          ...profiles[currentUser],
-          salary,
-          budgetPercentage: percentage,
-          budgetAllocation: allocation,
-        },
-      }),
-    );
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to save your budget configuration.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await saveBudgetConfig({
+        monthly_salary: salary,
+        budget_percentage: percentage,
+        allocation_need: allocation.need,
+        allocation_want: allocation.want,
+        allocation_savings: allocation.savings,
+        allocation_investments: allocation.investments,
+      });
+
+      toast({
+        title: "Configuration Saved",
+        description: "Your budget configuration has been saved to Supabase.",
+      });
+    } catch (error) {
+      console.error("Error saving budget config:", error);
+      toast({
+        title: "Save Failed",
+        description: "Failed to save budget configuration. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleInvestmentPlanUpdate = (plan: InvestmentPlan) => {
