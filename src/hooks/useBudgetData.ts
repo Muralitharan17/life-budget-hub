@@ -79,7 +79,29 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
     }
 
     try {
-      // Test basic Supabase connectivity
+      // Test network connectivity first
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      console.log("Testing network connectivity to Supabase...");
+
+      try {
+        // Test basic network connectivity
+        const healthCheck = await fetch(`${supabaseUrl}/health`, {
+          method: "GET",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        console.log("Network connectivity test:", healthCheck.status);
+      } catch (networkError) {
+        console.error("Network connectivity failed:");
+        console.error("Network error:", JSON.stringify(networkError, null, 2));
+        console.error("This might be a CORS, network, or firewall issue");
+        // Continue anyway as health endpoint might not exist
+      }
+
+      // Test basic Supabase connectivity with better error handling
+      console.log("Testing Supabase API connectivity...");
       const { data: testData, error: testError } = await supabase
         .from("profiles")
         .select("id")
@@ -98,8 +120,20 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
           code: testError.code || "No code",
           name: testError.name || "No name",
         });
+
+        // Check for specific network errors
+        if (
+          testError.message &&
+          testError.message.includes("Failed to fetch")
+        ) {
+          console.error("❌ Network connectivity issue detected:");
+          console.error("- Check if Supabase URL is correct:", supabaseUrl);
+          console.error("- Verify your internet connection");
+          console.error("- Check if the Supabase project is active");
+          console.error("- Verify firewall/proxy settings");
+        }
       } else {
-        console.log("Supabase connectivity test passed", testData);
+        console.log("✅ Supabase connectivity test passed", testData);
       }
 
       // Fetch budget config
