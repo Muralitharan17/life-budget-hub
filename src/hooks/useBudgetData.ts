@@ -37,6 +37,24 @@ export function useBudgetData() {
     console.log("Attempting to fetch budget data...");
 
     try {
+      // Test basic Supabase connectivity
+      const { data: testData, error: testError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (testError) {
+        console.error("Supabase connectivity test failed:", {
+          message: testError.message,
+          details: testError.details,
+          hint: testError.hint,
+          code: testError.code,
+        });
+      } else {
+        console.log("Supabase connectivity test passed");
+      }
+
       // Fetch budget config
       const { data: configData, error: configError } = await supabase
         .from("budget_configs")
