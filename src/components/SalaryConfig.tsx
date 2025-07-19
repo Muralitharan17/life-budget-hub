@@ -107,10 +107,7 @@ const SalaryConfig = ({
       return;
     }
 
-    onSalaryUpdate(actualSalary, budgetPercentage);
-
-    // Save budget allocation to localStorage
-    localStorage.setItem("budgetAllocation", JSON.stringify(budgetAllocation));
+    onSalaryUpdate(actualSalary, budgetPercentage, budgetAllocation);
 
     toast({
       title: "Configuration Saved",
