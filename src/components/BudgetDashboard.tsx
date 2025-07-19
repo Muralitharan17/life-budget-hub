@@ -243,7 +243,7 @@ const BudgetDashboard = () => {
     saveInvestmentPortfolio,
     addTransaction,
     refetch,
-  } = useBudgetData();
+  } = useBudgetData(selectedMonth, selectedYear);
 
   const [profiles, setProfiles] = useState<
     Record<"murali" | "valar", UserProfile>
