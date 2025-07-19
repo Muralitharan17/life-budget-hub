@@ -232,6 +232,19 @@ const BudgetDashboard = () => {
   const [isConfigAuthenticated, setIsConfigAuthenticated] = useState(false);
   const { toast } = useToast();
 
+  // Supabase data integration
+  const { user } = useAuth();
+  const {
+    budgetConfig,
+    portfolios,
+    transactions: supabaseTransactions,
+    loading: dataLoading,
+    saveBudgetConfig,
+    saveInvestmentPortfolio,
+    addTransaction,
+    refetch,
+  } = useBudgetData();
+
   const [profiles, setProfiles] = useState<
     Record<"murali" | "valar", UserProfile>
   >({
