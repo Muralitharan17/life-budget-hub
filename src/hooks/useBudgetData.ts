@@ -30,6 +30,12 @@ export function useBudgetData() {
     if (!user) return;
 
     setLoading(true);
+
+    // Debug Supabase connection
+    console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
+    console.log("User ID:", user.id);
+    console.log("Attempting to fetch budget data...");
+
     try {
       // Fetch budget config
       const { data: configData, error: configError } = await supabase
