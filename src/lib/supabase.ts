@@ -24,6 +24,12 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 // Auth helper functions
 export const auth = {
   signUp: async (email: string, password: string) => {
+    if (!hasValidCredentials) {
+      return { 
+        data: null, 
+        error: { message: 'Supabase not configured. Please set up your Supabase credentials.' } 
+      }
+    }
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -32,6 +38,12 @@ export const auth = {
   },
 
   signIn: async (email: string, password: string) => {
+    if (!hasValidCredentials) {
+      return { 
+        data: null, 
+        error: { message: 'Supabase not configured. Please set up your Supabase credentials.' } 
+      }
+    }
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -40,16 +52,28 @@ export const auth = {
   },
 
   signOut: async () => {
+    if (!hasValidCredentials) {
+      return { error: { message: 'Supabase not configured. Please set up your Supabase credentials.' } }
+    }
     const { error } = await supabase.auth.signOut()
     return { error }
   },
 
   getCurrentUser: async () => {
+    if (!hasValidCredentials) {
+      return { 
+        user: null, 
+        error: { message: 'Supabase not configured. Please set up your Supabase credentials.' } 
+      }
+    }
     const { data: { user }, error } = await supabase.auth.getUser()
     return { user, error }
   },
 
   onAuthStateChange: (callback: (event: string, session: any) => void) => {
+    if (!hasValidCredentials) {
+      return { data: { subscription: { unsubscribe: () => {} } } }
+    }
     return supabase.auth.onAuthStateChange(callback)
   }
 }
