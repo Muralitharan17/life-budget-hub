@@ -3343,67 +3343,6 @@ const BudgetDashboard = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="bank">
-            <div className="space-y-6">
-              <Card className="shadow-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-primary">
-                    <CreditCard className="h-6 w-6" />
-                    Bank Balance Tracker
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Track your bank balance and see how your expenses affect it
-                    throughout the month
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  {currentUser === "combined" ? (
-                    <div className="text-center py-12">
-                      <Card className="max-w-md mx-auto">
-                        <CardContent className="pt-6">
-                          <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                          <h3 className="text-lg font-semibold mb-2">
-                            Combined View Active
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            Bank balance tracking is not available in combined
-                            view. Please switch to an individual profile to
-                            track your bank balance.
-                          </p>
-                          <div className="flex justify-center">
-                            <ToggleGroup
-                              type="single"
-                              value={currentUser}
-                              onValueChange={handleProfileChange}
-                              className="border border-border rounded-md"
-                            >
-                              <ToggleGroupItem
-                                value="murali"
-                                aria-label="Murali's Profile"
-                                className="text-xs px-3 py-1"
-                              >
-                                Murali
-                              </ToggleGroupItem>
-                              <ToggleGroupItem
-                                value="valar"
-                                aria-label="Valar's Profile"
-                                className="text-xs px-3 py-1"
-                              >
-                                Valar
-                              </ToggleGroupItem>
-                            </ToggleGroup>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  ) : (
-                    <BankBalanceTracker />
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
           <TabsContent value="transactions">
             <Card className="shadow-card">
               <CardHeader>
