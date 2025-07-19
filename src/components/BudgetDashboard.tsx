@@ -3522,10 +3522,13 @@ const BudgetDashboard = () => {
                         user: currentProfile.name,
                       }));
                     const refunds = currentProfile.refunds
-                      .filter(
-                        (refund) =>
-                          new Date(refund.date).getMonth() === selectedMonth,
-                      )
+                      .filter((refund) => {
+                        const refundDate = new Date(refund.date);
+                        return (
+                          refundDate.getMonth() === selectedMonth &&
+                          refundDate.getFullYear() === selectedYear
+                        );
+                      })
                       .map((refund) => ({
                         ...refund,
                         type: "refund",
