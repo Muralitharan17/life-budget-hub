@@ -87,14 +87,19 @@ export function useBudgetData() {
         .maybeSingle();
 
       if (testError) {
-        console.error("Supabase connectivity test failed:", {
-          message: testError.message,
-          details: testError.details,
-          hint: testError.hint,
-          code: testError.code,
+        console.error("Supabase connectivity test failed:");
+        console.error("Full error object:", JSON.stringify(testError, null, 2));
+        console.error("Error type:", typeof testError);
+        console.error("Error keys:", Object.keys(testError));
+        console.error("Structured error:", {
+          message: testError.message || "No message",
+          details: testError.details || "No details",
+          hint: testError.hint || "No hint",
+          code: testError.code || "No code",
+          name: testError.name || "No name",
         });
       } else {
-        console.log("Supabase connectivity test passed");
+        console.log("Supabase connectivity test passed", testData);
       }
 
       // Fetch budget config
@@ -105,11 +110,18 @@ export function useBudgetData() {
         .single();
 
       if (configError && configError.code !== "PGRST116") {
-        console.error("Error fetching budget config:", {
-          message: configError.message,
-          details: configError.details,
-          hint: configError.hint,
-          code: configError.code,
+        console.error("Error fetching budget config:");
+        console.error(
+          "Full error object:",
+          JSON.stringify(configError, null, 2),
+        );
+        console.error("Error keys:", Object.keys(configError));
+        console.error("Structured error:", {
+          message: configError.message || "No message",
+          details: configError.details || "No details",
+          hint: configError.hint || "No hint",
+          code: configError.code || "No code",
+          name: configError.name || "No name",
         });
 
         // Show helpful error messages for common issues
@@ -140,11 +152,18 @@ export function useBudgetData() {
         .order("created_at", { ascending: true });
 
       if (portfolioError) {
-        console.error("Error fetching portfolios:", {
-          message: portfolioError.message,
-          details: portfolioError.details,
-          hint: portfolioError.hint,
-          code: portfolioError.code,
+        console.error("Error fetching portfolios:");
+        console.error(
+          "Full error object:",
+          JSON.stringify(portfolioError, null, 2),
+        );
+        console.error("Error keys:", Object.keys(portfolioError));
+        console.error("Structured error:", {
+          message: portfolioError.message || "No message",
+          details: portfolioError.details || "No details",
+          hint: portfolioError.hint || "No hint",
+          code: portfolioError.code || "No code",
+          name: portfolioError.name || "No name",
         });
 
         if (portfolioError.code === "42P01") {
@@ -169,11 +188,18 @@ export function useBudgetData() {
         .limit(50);
 
       if (transactionError) {
-        console.error("Error fetching transactions:", {
-          message: transactionError.message,
-          details: transactionError.details,
-          hint: transactionError.hint,
-          code: transactionError.code,
+        console.error("Error fetching transactions:");
+        console.error(
+          "Full error object:",
+          JSON.stringify(transactionError, null, 2),
+        );
+        console.error("Error keys:", Object.keys(transactionError));
+        console.error("Structured error:", {
+          message: transactionError.message || "No message",
+          details: transactionError.details || "No details",
+          hint: transactionError.hint || "No hint",
+          code: transactionError.code || "No code",
+          name: transactionError.name || "No name",
         });
 
         if (transactionError.code === "42P01") {
@@ -187,10 +213,15 @@ export function useBudgetData() {
         setTransactions(transactionData || []);
       }
     } catch (error) {
-      console.error("Error fetching budget data:", {
+      console.error("Error fetching budget data:");
+      console.error("Full error object:", JSON.stringify(error, null, 2));
+      console.error("Error type:", typeof error);
+      console.error("Error keys:", Object.keys(error || {}));
+      console.error("Structured error:", {
         error,
         message: error instanceof Error ? error.message : "Unknown error",
         stack: error instanceof Error ? error.stack : undefined,
+        stringified: String(error),
       });
     } finally {
       setLoading(false);
