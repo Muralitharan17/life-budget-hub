@@ -111,6 +111,23 @@ export function useBudgetData() {
           hint: configError.hint,
           code: configError.code,
         });
+
+        // Show helpful error messages for common issues
+        if (configError.code === "42P01") {
+          console.error(
+            '❌ Table "budget_configs" does not exist in your Supabase database',
+          );
+          console.log(
+            "💡 Please run the database migration scripts to create the required tables",
+          );
+        } else if (configError.code === "PGRST301") {
+          console.error(
+            "❌ RLS (Row Level Security) is blocking access to budget_configs table",
+          );
+          console.log(
+            "💡 Please check your RLS policies or disable RLS for development",
+          );
+        }
       } else {
         setBudgetConfig(configData);
       }
