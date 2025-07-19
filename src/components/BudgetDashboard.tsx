@@ -3228,6 +3228,38 @@ const BudgetDashboard = () => {
           />
         </div>
 
+        {/* No Data Message */}
+        {!allocatedAmounts.hasData && (
+          <Card className="border-muted-foreground/20 bg-muted/5 mb-6">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-2">
+                <div className="mx-auto w-12 h-12 bg-muted/20 rounded-full flex items-center justify-center">
+                  <Calendar className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold text-lg text-muted-foreground">
+                  No Data for {monthNames[selectedMonth]} {selectedYear}
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  There are no transactions recorded for this month and year.
+                  Budget allocations are only shown for months with actual
+                  financial activity or the current month.
+                </p>
+                <div className="text-xs text-muted-foreground mt-3">
+                  <p>💡 Budget plans are displayed when:</p>
+                  <p>
+                    • It's the current month (
+                    {monthNames[new Date().getMonth()]}{" "}
+                    {new Date().getFullYear()})
+                  </p>
+                  <p>
+                    • There are recorded transactions for the selected period
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Main Navigation Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-7 bg-muted p-1 rounded-lg">
