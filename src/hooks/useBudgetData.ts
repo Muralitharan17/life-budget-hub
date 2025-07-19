@@ -191,12 +191,11 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
         setBudgetConfig(configData);
       }
 
-      // Fetch investment portfolios
+      // Fetch investment portfolios (compatible with old schema)
       const { data: portfolioData, error: portfolioError } = await supabase
         .from("investment_portfolios")
         .select("*")
         .eq("user_id", user.id)
-        .eq("is_active", true)
         .order("created_at", { ascending: true });
 
       if (portfolioError) {
@@ -227,13 +226,11 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
         setPortfolios(portfolioData || []);
       }
 
-      // Fetch transactions filtered by month/year if provided
+      // Fetch transactions filtered by month/year if provided (compatible with old schema)
       let transactionQuery = supabase
         .from("transactions")
         .select("*")
         .eq("user_id", user.id)
-        .eq("is_deleted", false)
-        .in("status", ["active", "partial_refund"])
         .order("date", { ascending: false })
         .order("created_at", { ascending: false });
 
