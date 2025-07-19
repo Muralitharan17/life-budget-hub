@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "./useAuth";
 import type { Database } from "@/lib/database.types";
@@ -33,7 +33,7 @@ export function useBudgetData() {
     }
   }, [user]);
 
-  const fetchBudgetData = async () => {
+  const fetchBudgetData = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
@@ -226,7 +226,7 @@ export function useBudgetData() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, isSupabaseConfigured]);
 
   const saveBudgetConfig = async (
     config: Omit<BudgetConfig, "id" | "user_id" | "created_at" | "updated_at">,
