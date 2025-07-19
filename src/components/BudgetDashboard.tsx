@@ -3021,9 +3021,16 @@ const BudgetDashboard = () => {
                 <h1 className="text-2xl font-bold text-foreground">
                   Budget Tracker
                 </h1>
-                {user ? (
+                {user && budgetConfig?.id !== "local" ? (
                   <Badge variant="default" className="text-xs bg-success">
                     Supabase Connected
+                  </Badge>
+                ) : user && budgetConfig?.id === "local" ? (
+                  <Badge
+                    variant="secondary"
+                    className="text-xs bg-warning text-warning-foreground"
+                  >
+                    Offline Mode
                   </Badge>
                 ) : (
                   <Badge variant="destructive" className="text-xs">
