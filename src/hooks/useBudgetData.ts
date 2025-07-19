@@ -234,6 +234,26 @@ export function useBudgetData() {
     if (!user) return { error: "User not authenticated" };
 
     try {
+      // First, ensure the user profile exists
+      const { error: profileError } = await supabase.from("profiles").upsert(
+        {
+          id: user.id,
+          email: user.email || "",
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "id" },
+      );
+
+      if (profileError) {
+        console.error("Error creating/updating profile:");
+        console.error(
+          "Full error object:",
+          JSON.stringify(profileError, null, 2),
+        );
+        throw profileError;
+      }
+
+      // Now save the budget config
       const { data, error } = await supabase
         .from("budget_configs")
         .upsert({
