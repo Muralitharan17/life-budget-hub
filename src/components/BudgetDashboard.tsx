@@ -2177,7 +2177,7 @@ const BudgetDashboard = () => {
         <Card className="border-l-4 border-l-primary">
           <CardHeader>
             <CardTitle className="text-lg">
-              Set Opening Balance for {monthNames[selectedMonth]} {currentYear}
+              Set Opening Balance for {monthNames[selectedMonth]} {selectedYear}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
               Enter your bank balance at the beginning of the month
@@ -2230,7 +2230,7 @@ const BudgetDashboard = () => {
               <div className="text-center p-4 bg-background/50 rounded-lg">
                 <p className="text-sm text-muted-foreground">Opening Balance</p>
                 <p className="text-2xl font-bold text-primary">
-                  ₹{balanceData.openingBalance.toLocaleString()}
+                  ���{balanceData.openingBalance.toLocaleString()}
                 </p>
               </div>
               <div className="text-center p-4 bg-background/50 rounded-lg">
