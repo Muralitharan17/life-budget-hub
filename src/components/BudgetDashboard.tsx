@@ -368,11 +368,17 @@ const BudgetDashboard = () => {
       // Combine expenses from both users
       const muraliExpenses = profiles.murali.expenses.filter((expense) => {
         const expenseDate = new Date(expense.date);
-        return expenseDate.getMonth() === selectedMonth;
+        return (
+          expenseDate.getMonth() === selectedMonth &&
+          expenseDate.getFullYear() === selectedYear
+        );
       });
       const valarExpenses = profiles.valar.expenses.filter((expense) => {
         const expenseDate = new Date(expense.date);
-        return expenseDate.getMonth() === selectedMonth;
+        return (
+          expenseDate.getMonth() === selectedMonth &&
+          expenseDate.getFullYear() === selectedYear
+        );
       });
       currentMonthExpenses = [...muraliExpenses, ...valarExpenses];
 
@@ -2383,8 +2389,7 @@ const BudgetDashboard = () => {
                     <h3 className="text-lg font-semibold">{portfolio.name}</h3>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                       <span>
-                        Allocated: ��
-                        {portfolio.allocatedAmount.toLocaleString()}
+                        Allocated: ₹{portfolio.allocatedAmount.toLocaleString()}
                       </span>
                       <span>•</span>
                       <span className="text-primary">
