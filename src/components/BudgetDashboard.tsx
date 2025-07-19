@@ -3135,7 +3135,7 @@ const BudgetDashboard = () => {
                         Total Spent
                       </p>
                       <p className="text-2xl font-bold text-destructive">
-                        ���{totalSpent.toLocaleString()}
+                        ₹{totalSpent.toLocaleString()}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         Need + Want + Savings + Investments
