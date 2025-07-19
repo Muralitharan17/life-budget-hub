@@ -248,7 +248,18 @@ export function useBudgetData() {
       setBudgetConfig(data);
       return { data, error: null };
     } catch (error: any) {
-      console.error("Error saving budget config:", error);
+      console.error("Error saving budget config:");
+      console.error("Full error object:", JSON.stringify(error, null, 2));
+      console.error("Error type:", typeof error);
+      console.error("Error keys:", Object.keys(error || {}));
+      console.error("Structured error:", {
+        message: error?.message || "No message",
+        details: error?.details || "No details",
+        hint: error?.hint || "No hint",
+        code: error?.code || "No code",
+        name: error?.name || "No name",
+        stringified: String(error),
+      });
       return { data: null, error };
     }
   };
@@ -276,7 +287,18 @@ export function useBudgetData() {
       setPortfolios((prev) => [...prev, data]);
       return { data, error: null };
     } catch (error: any) {
-      console.error("Error saving portfolio:", error);
+      console.error("Error saving portfolio:");
+      console.error("Full error object:", JSON.stringify(error, null, 2));
+      console.error("Error type:", typeof error);
+      console.error("Error keys:", Object.keys(error || {}));
+      console.error("Structured error:", {
+        message: error?.message || "No message",
+        details: error?.details || "No details",
+        hint: error?.hint || "No hint",
+        code: error?.code || "No code",
+        name: error?.name || "No name",
+        stringified: String(error),
+      });
       return { data: null, error };
     }
   };
@@ -304,7 +326,18 @@ export function useBudgetData() {
       setTransactions((prev) => [data, ...prev]);
       return { data, error: null };
     } catch (error: any) {
-      console.error("Error adding transaction:", error);
+      console.error("Error adding transaction:");
+      console.error("Full error object:", JSON.stringify(error, null, 2));
+      console.error("Error type:", typeof error);
+      console.error("Error keys:", Object.keys(error || {}));
+      console.error("Structured error:", {
+        message: error?.message || "No message",
+        details: error?.details || "No details",
+        hint: error?.hint || "No hint",
+        code: error?.code || "No code",
+        name: error?.name || "No name",
+        stringified: String(error),
+      });
       return { data: null, error };
     }
   };
