@@ -133,13 +133,20 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
         console.error("Full error object:", JSON.stringify(testError, null, 2));
         console.error("Error type:", typeof testError);
         console.error("Error keys:", Object.keys(testError));
-        console.error("Structured error:", {
-          message: testError.message || "No message",
-          details: testError.details || "No details",
-          hint: testError.hint || "No hint",
-          code: testError.code || "No code",
-          name: testError.name || "No name",
-        });
+        console.error(
+          "Structured error:",
+          JSON.stringify(
+            {
+              message: testError.message || "No message",
+              details: testError.details || "No details",
+              hint: testError.hint || "No hint",
+              code: testError.code || "No code",
+              name: testError.name || "No name",
+            },
+            null,
+            2,
+          ),
+        );
 
         // Check for specific network errors
         if (
@@ -185,13 +192,20 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
           JSON.stringify(configError, null, 2),
         );
         console.error("Error keys:", Object.keys(configError));
-        console.error("Structured error:", {
-          message: configError.message || "No message",
-          details: configError.details || "No details",
-          hint: configError.hint || "No hint",
-          code: configError.code || "No code",
-          name: configError.name || "No name",
-        });
+        console.error(
+          "Structured error:",
+          JSON.stringify(
+            {
+              message: configError.message || "No message",
+              details: configError.details || "No details",
+              hint: configError.hint || "No hint",
+              code: configError.code || "No code",
+              name: configError.name || "No name",
+            },
+            null,
+            2,
+          ),
+        );
 
         // Show helpful error messages for common issues
         if (configError.code === "42P01") {
@@ -227,13 +241,20 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
           JSON.stringify(portfolioError, null, 2),
         );
         console.error("Error keys:", Object.keys(portfolioError));
-        console.error("Structured error:", {
-          message: portfolioError.message || "No message",
-          details: portfolioError.details || "No details",
-          hint: portfolioError.hint || "No hint",
-          code: portfolioError.code || "No code",
-          name: portfolioError.name || "No name",
-        });
+        console.error(
+          "Structured error:",
+          JSON.stringify(
+            {
+              message: portfolioError.message || "No message",
+              details: portfolioError.details || "No details",
+              hint: portfolioError.hint || "No hint",
+              code: portfolioError.code || "No code",
+              name: portfolioError.name || "No name",
+            },
+            null,
+            2,
+          ),
+        );
 
         if (portfolioError.code === "42P01") {
           console.error(
@@ -281,13 +302,20 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
           JSON.stringify(transactionError, null, 2),
         );
         console.error("Error keys:", Object.keys(transactionError));
-        console.error("Structured error:", {
-          message: transactionError.message || "No message",
-          details: transactionError.details || "No details",
-          hint: transactionError.hint || "No hint",
-          code: transactionError.code || "No code",
-          name: transactionError.name || "No name",
-        });
+        console.error(
+          "Structured error:",
+          JSON.stringify(
+            {
+              message: transactionError.message || "No message",
+              details: transactionError.details || "No details",
+              hint: transactionError.hint || "No hint",
+              code: transactionError.code || "No code",
+              name: transactionError.name || "No name",
+            },
+            null,
+            2,
+          ),
+        );
 
         if (transactionError.code === "42P01") {
           console.error(
@@ -316,12 +344,19 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
       console.error("Full error object:", JSON.stringify(error, null, 2));
       console.error("Error type:", typeof error);
       console.error("Error keys:", Object.keys(error || {}));
-      console.error("Structured error:", {
-        error,
-        message: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-        stringified: String(error),
-      });
+      console.error(
+        "Structured error:",
+        JSON.stringify(
+          {
+            error: String(error),
+            message: error instanceof Error ? error.message : "Unknown error",
+            stack: error instanceof Error ? error.stack : undefined,
+            stringified: String(error),
+          },
+          null,
+          2,
+        ),
+      );
 
       // If it's a network error, fall back to localStorage
       const errorMessage =
@@ -394,14 +429,21 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
       console.error("Full error object:", JSON.stringify(error, null, 2));
       console.error("Error type:", typeof error);
       console.error("Error keys:", Object.keys(error || {}));
-      console.error("Structured error:", {
-        message: error?.message || "No message",
-        details: error?.details || "No details",
-        hint: error?.hint || "No hint",
-        code: error?.code || "No code",
-        name: error?.name || "No name",
-        stringified: String(error),
-      });
+      console.error(
+        "Structured error:",
+        JSON.stringify(
+          {
+            message: error?.message || "No message",
+            details: error?.details || "No details",
+            hint: error?.hint || "No hint",
+            code: error?.code || "No code",
+            name: error?.name || "No name",
+            stringified: String(error),
+          },
+          null,
+          2,
+        ),
+      );
       return { data: null, error };
     }
   };
@@ -434,14 +476,21 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
       console.error("Full error object:", JSON.stringify(error, null, 2));
       console.error("Error type:", typeof error);
       console.error("Error keys:", Object.keys(error || {}));
-      console.error("Structured error:", {
-        message: error?.message || "No message",
-        details: error?.details || "No details",
-        hint: error?.hint || "No hint",
-        code: error?.code || "No code",
-        name: error?.name || "No name",
-        stringified: String(error),
-      });
+      console.error(
+        "Structured error:",
+        JSON.stringify(
+          {
+            message: error?.message || "No message",
+            details: error?.details || "No details",
+            hint: error?.hint || "No hint",
+            code: error?.code || "No code",
+            name: error?.name || "No name",
+            stringified: String(error),
+          },
+          null,
+          2,
+        ),
+      );
       return { data: null, error };
     }
   };
@@ -519,14 +568,21 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
       console.error("Full error object:", JSON.stringify(error, null, 2));
       console.error("Error type:", typeof error);
       console.error("Error keys:", Object.keys(error || {}));
-      console.error("Structured error:", {
-        message: error?.message || "No message",
-        details: error?.details || "No details",
-        hint: error?.hint || "No hint",
-        code: error?.code || "No code",
-        name: error?.name || "No name",
-        stringified: String(error),
-      });
+      console.error(
+        "Structured error:",
+        JSON.stringify(
+          {
+            message: error?.message || "No message",
+            details: error?.details || "No details",
+            hint: error?.hint || "No hint",
+            code: error?.code || "No code",
+            name: error?.name || "No name",
+            stringified: String(error),
+          },
+          null,
+          2,
+        ),
+      );
       return { data: null, error };
     }
   };
