@@ -2502,7 +2502,7 @@ const BudgetDashboard = () => {
                                         : "text-destructive"
                                     }
                                   >
-                                    Remaining: ���
+                                    Remaining: ₹
                                     {categoryRemaining.toLocaleString()}
                                   </span>
                                 </div>
