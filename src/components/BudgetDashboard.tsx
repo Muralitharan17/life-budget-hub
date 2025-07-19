@@ -2165,7 +2165,7 @@ const BudgetDashboard = () => {
 
       setOpeningBalance(
         selectedMonth,
-        currentYear,
+        selectedYear,
         parseFloat(newOpeningBalance),
       );
       setNewOpeningBalance("");
