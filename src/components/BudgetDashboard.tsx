@@ -385,11 +385,17 @@ const BudgetDashboard = () => {
       // Combine refunds from both users
       const muraliRefunds = profiles.murali.refunds.filter((refund) => {
         const refundDate = new Date(refund.date);
-        return refundDate.getMonth() === selectedMonth;
+        return (
+          refundDate.getMonth() === selectedMonth &&
+          refundDate.getFullYear() === selectedYear
+        );
       });
       const valarRefunds = profiles.valar.refunds.filter((refund) => {
         const refundDate = new Date(refund.date);
-        return refundDate.getMonth() === selectedMonth;
+        return (
+          refundDate.getMonth() === selectedMonth &&
+          refundDate.getFullYear() === selectedYear
+        );
       });
       currentMonthRefunds = [...muraliRefunds, ...valarRefunds];
     } else {
