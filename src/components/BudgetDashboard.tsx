@@ -2612,7 +2612,9 @@ const BudgetDashboard = () => {
         .filter((expense) => {
           const expenseDate = new Date(expense.date);
           const matchesCategory = expense.category === category;
-          const matchesMonth = expenseDate.getMonth() === selectedMonth;
+          const matchesMonth =
+            expenseDate.getMonth() === selectedMonth &&
+            expenseDate.getFullYear() === selectedYear;
           const matchesDateFilter = !filterDate || expense.date === filterDate;
           return matchesCategory && matchesMonth && matchesDateFilter;
         })
