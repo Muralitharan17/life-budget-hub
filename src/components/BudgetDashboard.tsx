@@ -3402,6 +3402,7 @@ const BudgetDashboard = () => {
                 currentInvestmentPlan={currentProfile.investmentPlan}
                 isAuthenticated={isConfigAuthenticated}
                 setIsAuthenticated={setIsConfigAuthenticated}
+                currentProfile={currentProfile}
               />
             )}
           </TabsContent>
