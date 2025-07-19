@@ -604,6 +604,13 @@ const BudgetDashboard = () => {
     }
   };
 
+  // Refetch data when month/year changes or when user changes
+  useEffect(() => {
+    if (user) {
+      refetch();
+    }
+  }, [selectedMonth, selectedYear, user, refetch]);
+
   useEffect(() => {
     const saved = localStorage.getItem("budgetProfiles");
     if (saved) {
