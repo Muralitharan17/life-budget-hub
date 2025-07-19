@@ -218,6 +218,7 @@ const TAG_COLORS = {
 
 const BudgetDashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [currentUser, setCurrentUser] = useState<
     "murali" | "valar" | "combined"
   >("murali");
