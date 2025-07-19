@@ -7,12 +7,24 @@ type BudgetConfig = Database["public"]["Tables"]["budget_configs"]["Row"];
 type InvestmentPortfolio =
   Database["public"]["Tables"]["investment_portfolios"]["Row"];
 type Transaction = Database["public"]["Tables"]["transactions"]["Row"];
+type TransactionHistory =
+  Database["public"]["Tables"]["transaction_history"]["Row"];
+
+type TransactionInsert = Database["public"]["Tables"]["transactions"]["Insert"];
+type TransactionUpdate = Database["public"]["Tables"]["transactions"]["Update"];
+type InvestmentPortfolioInsert =
+  Database["public"]["Tables"]["investment_portfolios"]["Insert"];
+type InvestmentPortfolioUpdate =
+  Database["public"]["Tables"]["investment_portfolios"]["Update"];
 
 export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
   const { user } = useAuth();
   const [budgetConfig, setBudgetConfig] = useState<BudgetConfig | null>(null);
   const [portfolios, setPortfolios] = useState<InvestmentPortfolio[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactionHistory, setTransactionHistory] = useState<
+    TransactionHistory[]
+  >([]);
   const [loading, setLoading] = useState(true);
 
   // Check if Supabase is properly configured
@@ -29,6 +41,7 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
       setBudgetConfig(null);
       setPortfolios([]);
       setTransactions([]);
+      setTransactionHistory([]);
       setLoading(false);
     }
   }, [user]);
@@ -183,6 +196,7 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
         .from("investment_portfolios")
         .select("*")
         .eq("user_id", user.id)
+        .eq("is_active", true)
         .order("created_at", { ascending: true });
 
       if (portfolioError) {
@@ -218,7 +232,10 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
         .from("transactions")
         .select("*")
         .eq("user_id", user.id)
-        .order("date", { ascending: false });
+        .eq("is_deleted", false)
+        .in("status", ["active", "partial_refund"])
+        .order("date", { ascending: false })
+        .order("created_at", { ascending: false });
 
       // Add month/year filtering if provided
       if (selectedMonth !== undefined && selectedYear !== undefined) {
@@ -232,7 +249,7 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
           .gte("date", startDate)
           .lte("date", endDate);
       } else {
-        transactionQuery = transactionQuery.limit(50);
+        transactionQuery = transactionQuery.limit(100);
       }
 
       const { data: transactionData, error: transactionError } =
@@ -262,6 +279,18 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
         }
       } else {
         setTransactions(transactionData || []);
+      }
+
+      // Fetch transaction history for audit trail
+      if (selectedMonth !== undefined && selectedYear !== undefined) {
+        const { data: historyData } = await supabase
+          .from("transaction_history")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(50);
+
+        setTransactionHistory(historyData || []);
       }
     } catch (error) {
       console.error("Error fetching budget data:");
@@ -322,6 +351,7 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
     }
   }, [user, isSupabaseConfigured, selectedMonth, selectedYear]);
 
+  // CRUD Operations for Budget Config
   const saveBudgetConfig = async (
     config: Omit<BudgetConfig, "id" | "user_id" | "created_at" | "updated_at">,
   ) => {
@@ -378,9 +408,10 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
     }
   };
 
+  // CRUD Operations for Investment Portfolios
   const saveInvestmentPortfolio = async (
     portfolio: Omit<
-      InvestmentPortfolio,
+      InvestmentPortfolioInsert,
       "id" | "user_id" | "created_at" | "updated_at"
     >,
   ) => {
@@ -417,9 +448,55 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
     }
   };
 
+  const updateInvestmentPortfolio = async (
+    id: string,
+    updates: InvestmentPortfolioUpdate,
+  ) => {
+    if (!user) return { error: "User not authenticated" };
+
+    try {
+      const { data, error } = await supabase
+        .from("investment_portfolios")
+        .update(updates)
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setPortfolios((prev) => prev.map((p) => (p.id === id ? data : p)));
+      return { data, error: null };
+    } catch (error: any) {
+      console.error("Error updating portfolio:", error);
+      return { data: null, error };
+    }
+  };
+
+  const deleteInvestmentPortfolio = async (id: string) => {
+    if (!user) return { error: "User not authenticated" };
+
+    try {
+      const { error } = await supabase
+        .from("investment_portfolios")
+        .update({ is_active: false })
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      setPortfolios((prev) => prev.filter((p) => p.id !== id));
+      return { error: null };
+    } catch (error: any) {
+      console.error("Error deleting portfolio:", error);
+      return { error };
+    }
+  };
+
+  // CRUD Operations for Transactions
   const addTransaction = async (
     transaction: Omit<
-      Transaction,
+      TransactionInsert,
       "id" | "user_id" | "created_at" | "updated_at"
     >,
   ) => {
@@ -456,14 +533,214 @@ export function useBudgetData(selectedMonth?: number, selectedYear?: number) {
     }
   };
 
+  const updateTransaction = async (id: string, updates: TransactionUpdate) => {
+    if (!user) return { error: "User not authenticated" };
+
+    try {
+      const { data, error } = await supabase
+        .from("transactions")
+        .update(updates)
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setTransactions((prev) => prev.map((t) => (t.id === id ? data : t)));
+      return { data, error: null };
+    } catch (error: any) {
+      console.error("Error updating transaction:", error);
+      return { data: null, error };
+    }
+  };
+
+  const deleteTransaction = async (id: string, softDelete = true) => {
+    if (!user) return { error: "User not authenticated" };
+
+    try {
+      if (softDelete) {
+        const { error } = await supabase
+          .from("transactions")
+          .update({
+            is_deleted: true,
+            deleted_at: new Date().toISOString(),
+            status: "cancelled",
+          })
+          .eq("id", id)
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+        setTransactions((prev) => prev.filter((t) => t.id !== id));
+      } else {
+        const { error } = await supabase
+          .from("transactions")
+          .delete()
+          .eq("id", id)
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+        setTransactions((prev) => prev.filter((t) => t.id !== id));
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error("Error deleting transaction:", error);
+      return { error };
+    }
+  };
+
+  const refundTransaction = async (
+    originalTransactionId: string,
+    refundAmount: number,
+    notes?: string,
+  ) => {
+    if (!user) return { error: "User not authenticated" };
+
+    try {
+      // Get original transaction
+      const { data: originalTransaction, error: fetchError } = await supabase
+        .from("transactions")
+        .select("*")
+        .eq("id", originalTransactionId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Create refund transaction
+      const { data: refundTransaction, error: refundError } = await supabase
+        .from("transactions")
+        .insert({
+          user_id: user.id,
+          type: "refund",
+          category: originalTransaction.category,
+          amount: refundAmount,
+          description: `Refund for: ${originalTransaction.description || "Transaction"}`,
+          notes: notes,
+          date: new Date().toISOString().split("T")[0],
+          time: new Date().toTimeString().split(" ")[0],
+          payment_type: originalTransaction.payment_type,
+          refund_for: originalTransactionId,
+          status: "active",
+        })
+        .select()
+        .single();
+
+      if (refundError) throw refundError;
+
+      // Update original transaction status
+      const newStatus =
+        refundAmount >= originalTransaction.amount
+          ? "refunded"
+          : "partial_refund";
+      await supabase
+        .from("transactions")
+        .update({
+          status: newStatus,
+          original_transaction_id: refundTransaction.id,
+        })
+        .eq("id", originalTransactionId);
+
+      setTransactions((prev) => [
+        refundTransaction,
+        ...prev.map((t) =>
+          t.id === originalTransactionId ? { ...t, status: newStatus } : t,
+        ),
+      ]);
+
+      return { data: refundTransaction, error: null };
+    } catch (error: any) {
+      console.error("Error processing refund:", error);
+      return { data: null, error };
+    }
+  };
+
+  const reduceInvestmentAmount = async (
+    transactionId: string,
+    reductionAmount: number,
+    notes?: string,
+  ) => {
+    if (!user) return { error: "User not authenticated" };
+
+    try {
+      // Get original transaction
+      const { data: originalTransaction, error: fetchError } = await supabase
+        .from("transactions")
+        .select("*")
+        .eq("id", transactionId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      if (originalTransaction.amount <= reductionAmount) {
+        return {
+          error:
+            "Reduction amount cannot be greater than or equal to original amount",
+        };
+      }
+
+      const newAmount = originalTransaction.amount - reductionAmount;
+
+      // Update original transaction
+      const { data, error } = await supabase
+        .from("transactions")
+        .update({
+          amount: newAmount,
+          notes: `${originalTransaction.notes || ""}\nAmount reduced by ₹${reductionAmount}${notes ? `: ${notes}` : ""}`,
+        })
+        .eq("id", transactionId)
+        .eq("user_id", user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Log the reduction in history
+      await supabase.from("transaction_history").insert({
+        transaction_id: transactionId,
+        user_id: user.id,
+        action: "amount_reduced",
+        old_values: { amount: originalTransaction.amount },
+        new_values: { amount: newAmount },
+        changes_description: `Amount reduced by ₹${reductionAmount}${notes ? `: ${notes}` : ""}`,
+        created_by: user.id,
+      });
+
+      setTransactions((prev) =>
+        prev.map((t) => (t.id === transactionId ? data : t)),
+      );
+      return { data, error: null };
+    } catch (error: any) {
+      console.error("Error reducing investment amount:", error);
+      return { data: null, error };
+    }
+  };
+
   return {
     budgetConfig,
     portfolios,
     transactions,
+    transactionHistory,
     loading,
+
+    // Budget Config Operations
     saveBudgetConfig,
+
+    // Portfolio Operations
     saveInvestmentPortfolio,
+    updateInvestmentPortfolio,
+    deleteInvestmentPortfolio,
+
+    // Transaction Operations
     addTransaction,
+    updateTransaction,
+    deleteTransaction,
+    refundTransaction,
+    reduceInvestmentAmount,
+
+    // Utility
     refetch: fetchBudgetData,
   };
 }
