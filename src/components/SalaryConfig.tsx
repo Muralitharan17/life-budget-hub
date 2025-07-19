@@ -191,8 +191,12 @@ const SalaryConfig = ({
                 type="number"
                 min="1"
                 max="100"
-                value={budgetPercentage}
-                onChange={(e) => setBudgetPercentage(Number(e.target.value))}
+                value={budgetPercentage === 0 ? "" : budgetPercentage}
+                onChange={(e) =>
+                  setBudgetPercentage(
+                    e.target.value === "" ? 0 : Number(e.target.value),
+                  )
+                }
                 placeholder="70"
                 className="flex-1"
               />
