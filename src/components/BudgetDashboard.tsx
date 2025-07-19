@@ -1261,8 +1261,13 @@ const BudgetDashboard = () => {
     currentInvestmentPlan,
     isAuthenticated,
     setIsAuthenticated,
+    currentProfile,
   }: {
-    onSalaryUpdate: (salary: number, budgetPercentage: number) => void;
+    onSalaryUpdate: (
+      salary: number,
+      budgetPercentage: number,
+      allocation: BudgetAllocation,
+    ) => void;
     currentSalary: number;
     currentBudgetPercentage: number;
     totalInvestmentAmount: number;
@@ -1271,6 +1276,7 @@ const BudgetDashboard = () => {
     currentInvestmentPlan: InvestmentPlan;
     isAuthenticated: boolean;
     setIsAuthenticated: (value: boolean) => void;
+    currentProfile: UserProfile;
   }) => {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
