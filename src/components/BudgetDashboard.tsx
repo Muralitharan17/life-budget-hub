@@ -515,13 +515,18 @@ const BudgetDashboard = () => {
     totalInvestmentSpent;
   const totalRemaining = calculatedTotalBudget - totalSpent;
 
-  const handleSalaryUpdate = (salary: number, percentage: number) => {
+  const handleSalaryUpdate = (
+    salary: number,
+    percentage: number,
+    allocation: BudgetAllocation,
+  ) => {
     setProfiles((prev) => ({
       ...prev,
       [currentUser]: {
         ...prev[currentUser],
         salary,
         budgetPercentage: percentage,
+        budgetAllocation: allocation,
       },
     }));
     localStorage.setItem(
@@ -532,6 +537,7 @@ const BudgetDashboard = () => {
           ...profiles[currentUser],
           salary,
           budgetPercentage: percentage,
+          budgetAllocation: allocation,
         },
       }),
     );
