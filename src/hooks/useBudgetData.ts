@@ -41,7 +41,42 @@ export function useBudgetData() {
     // Debug Supabase connection
     console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
     console.log("User ID:", user.id);
+    console.log("Supabase configured:", isSupabaseConfigured);
     console.log("Attempting to fetch budget data...");
+
+    if (!isSupabaseConfigured) {
+      console.warn("Supabase not configured - falling back to localStorage");
+      // Fallback to localStorage for development
+      try {
+        const saved = localStorage.getItem("budgetProfiles");
+        if (saved) {
+          const profiles = JSON.parse(saved);
+          const userProfile =
+            profiles[user.email?.split("@")[0]] ||
+            profiles["murali"] ||
+            profiles["valar"];
+          if (userProfile) {
+            setBudgetConfig({
+              id: "local",
+              user_id: user.id,
+              monthly_salary: userProfile.salary || 0,
+              budget_percentage: userProfile.budgetPercentage || 0,
+              allocation_need: userProfile.budgetAllocation?.need || 0,
+              allocation_want: userProfile.budgetAllocation?.want || 0,
+              allocation_savings: userProfile.budgetAllocation?.savings || 0,
+              allocation_investments:
+                userProfile.budgetAllocation?.investments || 0,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error loading from localStorage:", error);
+      }
+      setLoading(false);
+      return;
+    }
 
     try {
       // Test basic Supabase connectivity
