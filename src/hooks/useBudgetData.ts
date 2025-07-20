@@ -128,15 +128,39 @@ export function useBudgetData(month: number, year: number, profileName: string) 
       console.log('Fetched budget config:', budgetData);
       setBudgetConfig(budgetData);
 
-      // Fetch investment portfolios for specific profile
-      const { data: portfolioData, error: portfolioError } = await supabase
-        .from('investment_portfolios')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('profile_name', profileName)
-        .eq('budget_month', month)
-        .eq('budget_year', year)
-        .eq('is_active', true);
+            // Fetch investment portfolios for specific profile
+      let portfolioData = null;
+      let portfolioError = null;
+
+      try {
+        const { data, error } = await supabase
+          .from('investment_portfolios')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('profile_name', profileName)
+          .eq('budget_month', month)
+          .eq('budget_year', year)
+          .eq('is_active', true);
+        portfolioData = data;
+        portfolioError = error;
+      } catch (err) {
+        // Profile_name column doesn't exist yet, try without it
+        console.log('Trying fallback query for portfolios without profile_name column');
+        const { data, error } = await supabase
+          .from('investment_portfolios')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('budget_month', month)
+          .eq('budget_year', year)
+          .eq('is_active', true);
+        portfolioData = data;
+        portfolioError = error;
+
+        // Add profile_name to the data for consistency
+        if (portfolioData) {
+          portfolioData = portfolioData.map((p: any) => ({ ...p, profile_name: profileName }));
+        }
+      }
 
       if (portfolioError) {
         console.error('Portfolio fetch error:', portfolioError);
