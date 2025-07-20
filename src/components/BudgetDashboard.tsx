@@ -65,7 +65,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { useBudgetData } from "@/hooks/useBudgetDataFixed";
+import { useBudgetData } from "@/hooks/useBudgetData";
 import { useAuth } from "@/hooks/useAuth";
 import SalaryConfig from "./SalaryConfig";
 import InvestmentConfig from "./InvestmentConfig";
@@ -2453,7 +2453,7 @@ const BudgetDashboard = () => {
               <div className="text-center p-4 bg-background/50 rounded-lg">
                 <p className="text-sm text-muted-foreground">Opening Balance</p>
                 <p className="text-2xl font-bold text-primary">
-                  ₹{balanceData.openingBalance.toLocaleString()}
+                  ��{balanceData.openingBalance.toLocaleString()}
                 </p>
               </div>
               <div className="text-center p-4 bg-background/50 rounded-lg">
