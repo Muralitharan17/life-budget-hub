@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useBudgetData } from "@/hooks/useBudgetData";
+import { useBudgetData } from "@/hooks/useBudgetDataFixed";
 
 interface BudgetAllocation {
   need: number;
@@ -388,7 +388,7 @@ const ConfigurationInheritance = ({
             <li>
               • Budget allocation breakdown (Need/Want/Savings/Investments)
             </li>
-            <li>• All investment portfolio structures and allocations</li>
+            <li>��� All investment portfolio structures and allocations</li>
             <li>• Investment categories and fund configurations</li>
           </ul>
           <p className="mt-2 text-xs text-muted-foreground">
