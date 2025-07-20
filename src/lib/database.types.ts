@@ -74,10 +74,11 @@ export interface Database {
         };
         Relationships: [];
       };
-      budget_configs: {
+            budget_configs: {
         Row: {
           id: string;
           user_id: string;
+          profile_name: string;
           budget_period_id: string;
           budget_year: number;
           budget_month: number;
@@ -90,9 +91,10 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: {
+                Insert: {
           id?: string;
           user_id: string;
+          profile_name: string;
           budget_period_id: string;
           budget_year: number;
           budget_month: number;
@@ -105,9 +107,10 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
-        Update: {
+                Update: {
           id?: string;
           user_id?: string;
+          profile_name?: string;
           budget_period_id?: string;
           budget_year?: number;
           budget_month?: number;
@@ -135,10 +138,11 @@ export interface Database {
           },
         ];
       };
-      investment_portfolios: {
+            investment_portfolios: {
         Row: {
           id: string;
           user_id: string;
+          profile_name: string;
           budget_period_id: string;
           budget_year: number;
           budget_month: number;
@@ -152,9 +156,10 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: {
+                Insert: {
           id?: string;
           user_id: string;
+          profile_name: string;
           budget_period_id: string;
           budget_year: number;
           budget_month: number;
@@ -168,9 +173,10 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
-        Update: {
+                Update: {
           id?: string;
           user_id?: string;
+          profile_name?: string;
           budget_period_id?: string;
           budget_year?: number;
           budget_month?: number;
@@ -199,10 +205,11 @@ export interface Database {
           },
         ];
       };
-      transactions: {
+            transactions: {
         Row: {
           id: string;
           user_id: string;
+          profile_name: string;
           budget_period_id: string;
           budget_year: number;
           budget_month: number;
@@ -239,9 +246,10 @@ export interface Database {
           updated_at: string;
           deleted_at: string | null;
         };
-        Insert: {
+                Insert: {
           id?: string;
           user_id: string;
+          profile_name: string;
           budget_period_id: string;
           budget_year: number;
           budget_month: number;
@@ -278,9 +286,10 @@ export interface Database {
           updated_at?: string;
           deleted_at?: string | null;
         };
-        Update: {
+                Update: {
           id?: string;
           user_id?: string;
+          profile_name?: string;
           budget_period_id?: string;
           budget_year?: number;
           budget_month?: number;
@@ -350,11 +359,12 @@ export interface Database {
           },
         ];
       };
-      transaction_history: {
+            transaction_history: {
         Row: {
           id: string;
           transaction_id: string;
           user_id: string;
+          profile_name: string;
           budget_period_id: string;
           budget_year: number;
           budget_month: number;
@@ -370,10 +380,11 @@ export interface Database {
           created_at: string;
           created_by: string | null;
         };
-        Insert: {
+                Insert: {
           id?: string;
           transaction_id: string;
           user_id: string;
+          profile_name: string;
           budget_period_id: string;
           budget_year: number;
           budget_month: number;
@@ -389,10 +400,11 @@ export interface Database {
           created_at?: string;
           created_by?: string | null;
         };
-        Update: {
+                Update: {
           id?: string;
           transaction_id?: string;
           user_id?: string;
+          profile_name?: string;
           budget_period_id?: string;
           budget_year?: number;
           budget_month?: number;
