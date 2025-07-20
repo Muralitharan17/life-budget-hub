@@ -170,16 +170,41 @@ export function useBudgetData(month: number, year: number, profileName: string) 
       console.log('Fetched portfolios:', portfolioData);
       setPortfolios(portfolioData || []);
 
-      // Fetch transactions for specific profile
-      const { data: transactionData, error: transactionError } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('profile_name', profileName)
-        .eq('budget_month', month)
-        .eq('budget_year', year)
-        .eq('is_deleted', false)
-        .order('transaction_date', { ascending: false });
+            // Fetch transactions for specific profile
+      let transactionData = null;
+      let transactionError = null;
+
+      try {
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('profile_name', profileName)
+          .eq('budget_month', month)
+          .eq('budget_year', year)
+          .eq('is_deleted', false)
+          .order('transaction_date', { ascending: false });
+        transactionData = data;
+        transactionError = error;
+      } catch (err) {
+        // Profile_name column doesn't exist yet, try without it
+        console.log('Trying fallback query for transactions without profile_name column');
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('budget_month', month)
+          .eq('budget_year', year)
+          .eq('is_deleted', false)
+          .order('transaction_date', { ascending: false });
+        transactionData = data;
+        transactionError = error;
+
+        // Add profile_name to the data for consistency
+        if (transactionData) {
+          transactionData = transactionData.map((t: any) => ({ ...t, profile_name: profileName }));
+        }
+      }
 
       if (transactionError) {
         console.error('Transaction fetch error:', transactionError);
