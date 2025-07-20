@@ -85,15 +85,40 @@ export function useBudgetData(month: number, year: number, profileName: string) 
 
       console.log('Fetching budget data for:', { user: user.id, profileName, month, year });
 
-      // Fetch budget config for specific profile
-      const { data: budgetData, error: budgetError } = await supabase
-        .from('budget_configs')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('profile_name', profileName)
-        .eq('budget_month', month)
-        .eq('budget_year', year)
-        .maybeSingle();
+            // Fetch budget config for specific profile
+      // First try with profile_name column (new schema), fallback to without it (old schema)
+      let budgetData = null;
+      let budgetError = null;
+
+      try {
+        const { data, error } = await supabase
+          .from('budget_configs')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('profile_name', profileName)
+          .eq('budget_month', month)
+          .eq('budget_year', year)
+          .maybeSingle();
+        budgetData = data;
+        budgetError = error;
+      } catch (err) {
+        // Profile_name column doesn't exist yet, try without it
+        console.log('Trying fallback query without profile_name column');
+        const { data, error } = await supabase
+          .from('budget_configs')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('budget_month', month)
+          .eq('budget_year', year)
+          .maybeSingle();
+        budgetData = data;
+        budgetError = error;
+
+        // Add profile_name to the data for consistency
+        if (budgetData) {
+          budgetData.profile_name = profileName;
+        }
+      }
 
       if (budgetError && budgetError.code !== 'PGRST116') {
         console.error('Budget config fetch error:', budgetError);
@@ -103,15 +128,39 @@ export function useBudgetData(month: number, year: number, profileName: string) 
       console.log('Fetched budget config:', budgetData);
       setBudgetConfig(budgetData);
 
-      // Fetch investment portfolios for specific profile
-      const { data: portfolioData, error: portfolioError } = await supabase
-        .from('investment_portfolios')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('profile_name', profileName)
-        .eq('budget_month', month)
-        .eq('budget_year', year)
-        .eq('is_active', true);
+            // Fetch investment portfolios for specific profile
+      let portfolioData = null;
+      let portfolioError = null;
+
+      try {
+        const { data, error } = await supabase
+          .from('investment_portfolios')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('profile_name', profileName)
+          .eq('budget_month', month)
+          .eq('budget_year', year)
+          .eq('is_active', true);
+        portfolioData = data;
+        portfolioError = error;
+      } catch (err) {
+        // Profile_name column doesn't exist yet, try without it
+        console.log('Trying fallback query for portfolios without profile_name column');
+        const { data, error } = await supabase
+          .from('investment_portfolios')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('budget_month', month)
+          .eq('budget_year', year)
+          .eq('is_active', true);
+        portfolioData = data;
+        portfolioError = error;
+
+        // Add profile_name to the data for consistency
+        if (portfolioData) {
+          portfolioData = portfolioData.map((p: any) => ({ ...p, profile_name: profileName }));
+        }
+      }
 
       if (portfolioError) {
         console.error('Portfolio fetch error:', portfolioError);
@@ -121,16 +170,41 @@ export function useBudgetData(month: number, year: number, profileName: string) 
       console.log('Fetched portfolios:', portfolioData);
       setPortfolios(portfolioData || []);
 
-      // Fetch transactions for specific profile
-      const { data: transactionData, error: transactionError } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('profile_name', profileName)
-        .eq('budget_month', month)
-        .eq('budget_year', year)
-        .eq('is_deleted', false)
-        .order('transaction_date', { ascending: false });
+            // Fetch transactions for specific profile
+      let transactionData = null;
+      let transactionError = null;
+
+      try {
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('profile_name', profileName)
+          .eq('budget_month', month)
+          .eq('budget_year', year)
+          .eq('is_deleted', false)
+          .order('transaction_date', { ascending: false });
+        transactionData = data;
+        transactionError = error;
+      } catch (err) {
+        // Profile_name column doesn't exist yet, try without it
+        console.log('Trying fallback query for transactions without profile_name column');
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('budget_month', month)
+          .eq('budget_year', year)
+          .eq('is_deleted', false)
+          .order('transaction_date', { ascending: false });
+        transactionData = data;
+        transactionError = error;
+
+        // Add profile_name to the data for consistency
+        if (transactionData) {
+          transactionData = transactionData.map((t: any) => ({ ...t, profile_name: profileName }));
+        }
+      }
 
       if (transactionError) {
         console.error('Transaction fetch error:', transactionError);

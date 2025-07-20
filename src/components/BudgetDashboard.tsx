@@ -244,7 +244,7 @@ const BudgetDashboard = () => {
     saveInvestmentPortfolio,
     addTransaction,
     refetch,
-  } = useBudgetData(selectedMonth, selectedYear);
+    } = useBudgetData(selectedMonth, selectedYear, currentUser === "combined" ? "murali" : currentUser);
 
   const [profiles, setProfiles] = useState<
     Record<"murali" | "valar", UserProfile>
@@ -2453,7 +2453,7 @@ const BudgetDashboard = () => {
               <div className="text-center p-4 bg-background/50 rounded-lg">
                 <p className="text-sm text-muted-foreground">Opening Balance</p>
                 <p className="text-2xl font-bold text-primary">
-                  ₹{balanceData.openingBalance.toLocaleString()}
+                  ��{balanceData.openingBalance.toLocaleString()}
                 </p>
               </div>
               <div className="text-center p-4 bg-background/50 rounded-lg">
